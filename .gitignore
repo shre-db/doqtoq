@@ -1,0 +1,62 @@
+# Python cache and compiled files
+__pycache__/
+*.py[cod]
+*.so
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+
+# Environments
+.venv/
+env/
+venv/
+ENV/
+*.env
+.env
+
+# Logs and debug files
+*.log
+*.out
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Streamlit cache
+.streamlit/secrets.toml
+
+# Uploads and generated data
+data/uploads/
+vectorstore/index/
+
+# VSCode, PyCharm, etc.
+.vscode/
+.idea/
+
+# Docker artifacts
+*.pid
+*.tar
+*.img
+
+# Image files
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.svg
+
+# Temporary files
+*.tmp
+
+# Do not ignore the .png image inside the docs directory
+!assets/*.png
+!assets/*.svg
+!assets/*.png
+
+
+# Vectorstore files
+vectorstore/*.json
+# Ignore all artifacts in the vectorstore directory
+*.sqlite3
+*.bin
+vectorstore/index/*/

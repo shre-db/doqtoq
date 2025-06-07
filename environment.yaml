@@ -1,0 +1,28 @@
+name: doqtoq
+channels:
+  - defaults
+  - conda-forge
+dependencies:
+  - python=3.12
+  - pip
+  - pip:
+      - streamlit
+      - streamlit-chat
+      - langchain
+      - langchain-community
+      - langchain-huggingface
+      - langchain-chroma
+      - langchain-google-genai
+      - langchain-mistralai
+      - mistralai
+      - chromadb
+      - python-dotenv
+      - PyPDF2
+      - sentence-transformers
+      - tiktoken
+      - pydantic
+      - requests
+      - numpy
+      - pandas
+      - ollama
+      - pipreqs
