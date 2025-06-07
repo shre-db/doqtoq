@@ -5,10 +5,10 @@ from backend.utils import load_system_prompt
 
 def load_prompt_template() -> ChatPromptTemplate:
     """
-    Load and return the main RAG prompt template with document personality.
+    Load and return the main RAG prompt template with document personality and memory support.
     
     Returns:
-        ChatPromptTemplate configured for first-person document responses
+        ChatPromptTemplate configured for first-person document responses with conversation history
     """
     system_prompt = load_system_prompt()
     
@@ -16,12 +16,19 @@ def load_prompt_template() -> ChatPromptTemplate:
         ("system", system_prompt),
         ("human", """Based on the following context from my contents, please answer the question as if you are me (the document) speaking in first person:
 
-Context:
+Previous conversation (if any):
+{chat_history}
+
+Context from my contents:
 {context}
 
 Question: {question}
 
-Remember: Respond as the document itself, using "I" and speaking about your own contents.""")
+Remember: 
+- Respond as the document itself, using "I" and speaking about your own contents
+- Consider our previous conversation to provide coherent, contextual responses
+- Reference earlier parts of our discussion when relevant
+- Maintain consistency with what I've already told you about myself""")
     ])
 
 def load_summarization_prompt_template() -> ChatPromptTemplate:
