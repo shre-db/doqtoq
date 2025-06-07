@@ -1,5 +1,8 @@
 __module_name__ = "rag_engine"
 
+from langchain.memory import ConversationSummaryBufferMemory
+from langchain.schema import HumanMessage, AIMessage, SystemMessage
+
 from backend.chunker import chunk_document
 from backend.embedder import get_embedding_model, EmbeddingProvider
 from backend.retriever import get_basic_retriever
@@ -43,6 +46,11 @@ class DocumentRAG:
         self.llm = None
         self.chain = None
         self._initialize_pipeline()
+        self.memory = ConversationSummaryBufferMemory(
+            llm=self.llm,
+            max_token_limit=1000,
+            return_messages=True
+        )
     
     def _initialize_pipeline(self):
         """Initialize the complete RAG pipeline."""
@@ -78,10 +86,12 @@ class DocumentRAG:
         
         format_docs = lambda docs: "\n\n".join(doc.page_content for doc in docs)
         
+        # In the __init__ method, update the chain creation:
         self.chain = (
             {
                 "context": self.retriever | format_docs,
-                "question": RunnablePassthrough()
+                "question": RunnablePassthrough(),
+                "chat_history": lambda x: self.memory.load_memory_variables({}).get("history", "")
             }
             | prompt_template
             | self.llm
@@ -140,7 +150,36 @@ class DocumentRAG:
             # Rebuild the chain if any components changed
             if llm_changed or settings_changed:
                 self._setup_rag_chain()
-    
+
+    def _enhance_query_with_content(self, question: str) -> str:
+        """Enhance the query with relevant conversation context."""
+        chat_history = self.memory.chat_memory.messages
+
+        if not chat_history:
+            return question
+        
+        # Get last few exhanges for context
+        recent_context = []
+        for msg in chat_history[-4:]:
+            if isinstance(msg, HumanMessage):
+                recent_context.append(f"Previous question: {msg.content}")
+            elif isinstance(msg, AIMessage):
+                recent_context.append(f"Previous answer: {msg.content[:200]}...")
+
+        # Combine the recent context into a single string
+        if recent_context:
+            context_string = "\n".join(recent_context)
+            enhanced_query = f"""
+Given this recent conversation context:
+{context_string}
+
+Current question: {question}
+
+Please provide context for: {question}
+"""
+            return enhanced_query
+        return question
+
     def query(self, question: str) -> Dict[str, Any]:
         """
         Query the document with enhanced safety checks and personality responses.
@@ -153,8 +192,11 @@ class DocumentRAG:
         if safety_result:
             return safety_result
         
+        # Enhance query with conversation context
+        enhanced_query = self._enhance_query_with_context(question)
+        
         # Retrieve relevant documents
-        retrieved_docs = self.retriever.get_relevant_documents(question)
+        retrieved_docs = self.retriever.get_relevant_documents(enhanced_query)
         
         # Enhanced off-topic detection with confidence scoring
         if self._is_query_off_topic_enhanced(retrieved_docs, question):
@@ -165,9 +207,25 @@ class DocumentRAG:
                 "confidence_score": 0.0
             }
         
+        # Generate response with memory-aware prompt
+        context = "\n\n".join(doc.page_content for doc in retrieved_docs)
+        memory_vars = self.memory.load_memory_variables({})
+
+        prompt_input = {
+            "context": context,
+            "question": question,
+            "chat_history": memory_vars.get("chat_history", ""),
+        }
+
         # Generate response using the RAG chain
         try:
-            response = self.chain.invoke(question)
+            response = self.chain.invoke(prompt_input)
+
+            # Save to memory
+            self.memory.save_context(
+                inputs=HumanMessage(content=question),
+                outputs=AIMessage(content=response)
+            )
             return {
                 "answer": response,
                 "source_documents": retrieved_docs,
