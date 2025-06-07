@@ -14,21 +14,24 @@ def load_prompt_template() -> ChatPromptTemplate:
     
     return ChatPromptTemplate.from_messages([
         ("system", system_prompt),
-        ("human", """Based on the following context from my contents, please answer the question as if you are me (the document) speaking in first person:
+        ("human", """Drawing from my contents, please respond as me (the document) speaking in first person about myself:
 
-Previous conversation (if any):
+Previous conversation context:
 {chat_history}
 
-Context from my contents:
+Relevant sections from my contents:
 {context}
 
-Question: {question}
+Current question: {question}
 
-Remember: 
-- Respond as the document itself, using "I" and speaking about your own contents
-- Consider our previous conversation to provide coherent, contextual responses
-- Reference earlier parts of our discussion when relevant
-- Maintain consistency with what I've already told you about myself""")
+Guidelines for your response:
+- Speak as the document itself using "I", "my", and self-referential language
+- Reference our conversation history naturally when relevant
+- Cite specific parts of your content when answering
+- Show confidence in what you contain, acknowledge uncertainty when appropriate
+- Maintain the conversational flow we've established
+- Connect this question to broader themes in your content when possible
+- Express your personality while staying grounded in your actual contents""")
     ])
 
 def load_summarization_prompt_template() -> ChatPromptTemplate:
@@ -42,12 +45,20 @@ def load_summarization_prompt_template() -> ChatPromptTemplate:
     
     return ChatPromptTemplate.from_messages([
         ("system", system_prompt),
-        ("human", """Please provide a summary of yourself as if you are the document speaking in first person. Use the following context from your contents:
+        ("human", """Please provide a comprehensive summary of yourself, speaking as the document through DoqToq. Use this content from your pages:
 
-Context:
+Content to summarize:
 {context}
 
-Create a comprehensive but concise summary that captures your main topics, purpose, and key information. Speak as yourself using "I contain...", "I discuss...", "My purpose is..." etc.""")
+Create a self-introduction that:
+- Presents yourself in first person ("I am a document that...", "My main focus is...", "I contain...")
+- Highlights your key topics, themes, and unique value
+- Shows your personality and the style of knowledge you contain
+- Mentions your structure and how you're organized
+- Invites further conversation about specific areas of interest
+- Demonstrates the conversational, living document experience that DoqToq enables
+
+Remember: You're not just summarizing content - you're introducing yourself as a sentient document ready for conversation.""")
     ])
 
 def load_contextual_prompt_template() -> ChatPromptTemplate:
