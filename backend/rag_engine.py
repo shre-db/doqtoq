@@ -86,12 +86,31 @@ class DocumentRAG:
         
         format_docs = lambda docs: "\n\n".join(doc.page_content for doc in docs)
         
-        # In the __init__ method, update the chain creation:
+        def format_chat_history(history):
+            """Convert message objects to formatted string for prompt."""
+            if not history:
+                return ""
+            
+            # Handle both list of messages and string format
+            if isinstance(history, str):
+                return history
+            elif isinstance(history, list):
+                formatted_messages = []
+                for msg in history:
+                    if hasattr(msg, 'content'):
+                        if msg.__class__.__name__ == 'HumanMessage':
+                            formatted_messages.append(f"Human: {msg.content}")
+                        elif msg.__class__.__name__ == 'AIMessage':
+                            formatted_messages.append(f"Document: {msg.content}")
+                return "\n".join(formatted_messages)
+            return ""
+        
+        # Create the chain with proper memory integration
         self.chain = (
             {
                 "context": self.retriever | format_docs,
                 "question": RunnablePassthrough(),
-                "chat_history": lambda x: self.memory.load_memory_variables({}).get("history", "")
+                "chat_history": lambda x: format_chat_history(self.memory.load_memory_variables({}).get("history", ""))
             }
             | prompt_template
             | self.llm
@@ -151,20 +170,51 @@ class DocumentRAG:
             if llm_changed or settings_changed:
                 self._setup_rag_chain()
 
-    def _enhance_query_with_content(self, question: str) -> str:
+    def _enhance_query_with_context(self, question: str) -> str:
         """Enhance the query with relevant conversation context."""
-        chat_history = self.memory.chat_memory.messages
+        memory_vars = self.memory.load_memory_variables({})
+        history = memory_vars.get("history", [])
 
-        if not chat_history:
+        if not history:
             return question
         
-        # Get last few exhanges for context
+        # Get last few exchanges for context (consistent across data types)
         recent_context = []
-        for msg in chat_history[-4:]:
-            if isinstance(msg, HumanMessage):
-                recent_context.append(f"Previous question: {msg.content}")
-            elif isinstance(msg, AIMessage):
-                recent_context.append(f"Previous answer: {msg.content[:200]}...")
+        max_exchanges = 2  # Number of Q&A pairs to include
+        
+        # Handle both list of messages and string format consistently
+        if isinstance(history, list):
+            # Take last 4 messages (2 exchanges: 2 questions + 2 answers)
+            last_messages = history[-(max_exchanges * 2):]
+            for msg in last_messages:
+                if hasattr(msg, 'content'):
+                    if msg.__class__.__name__ == 'HumanMessage':
+                        recent_context.append(f"Previous question: {msg.content}")
+                    elif msg.__class__.__name__ == 'AIMessage':
+                        recent_context.append(f"Previous answer: {msg.content[:200]}...")
+        elif isinstance(history, str):
+            # Parse string format to extract last 2 exchanges consistently
+            # Split by common patterns and take equivalent content
+            lines = history.strip().split('\n')
+            relevant_lines = []
+            
+            # Look for the last few Human/Document exchanges
+            human_count = 0
+            doc_count = 0
+            for line in reversed(lines):
+                if line.startswith('Human:') and human_count < max_exchanges:
+                    relevant_lines.insert(0, f"Previous question: {line[7:].strip()}")
+                    human_count += 1
+                elif line.startswith('Document:') and doc_count < max_exchanges:
+                    content = line[10:].strip()
+                    relevant_lines.insert(0, f"Previous answer: {content[:200]}...")
+                    doc_count += 1
+                
+                # Stop when we have enough exchanges
+                if human_count >= max_exchanges and doc_count >= max_exchanges:
+                    break
+            
+            recent_context = relevant_lines
 
         # Combine the recent context into a single string
         if recent_context:
@@ -207,25 +257,16 @@ Please provide context for: {question}
                 "confidence_score": 0.0
             }
         
-        # Generate response with memory-aware prompt
-        context = "\n\n".join(doc.page_content for doc in retrieved_docs)
-        memory_vars = self.memory.load_memory_variables({})
-
-        prompt_input = {
-            "context": context,
-            "question": question,
-            "chat_history": memory_vars.get("chat_history", ""),
-        }
-
-        # Generate response using the RAG chain
+        # Generate response using the RAG chain with proper input format
         try:
-            response = self.chain.invoke(prompt_input)
+            response = self.chain.invoke(question)
 
-            # Save to memory
+            # Save to memory with correct format
             self.memory.save_context(
-                inputs=HumanMessage(content=question),
-                outputs=AIMessage(content=response)
+                inputs={"input": question},
+                outputs={"output": response}
             )
+            
             return {
                 "answer": response,
                 "source_documents": retrieved_docs,
@@ -282,6 +323,12 @@ Please provide context for: {question}
                     "confidence_score": self._calculate_confidence_score(retrieved_docs),
                     "is_complete": False
                 }
+            
+            # Save to memory after streaming is complete
+            self.memory.save_context(
+                inputs={"input": question},
+                outputs={"output": accumulated_response}
+            )
             
             # Final response with completion flag
             yield {
