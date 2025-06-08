@@ -4,18 +4,25 @@ import streamlit as st
 import os
 import time
 from streamlit_chat import message
-from utils import load_svg_icon
+from utils import load_svg_icon, load_png_icon
 
 def get_default_avatar():
     document_path = os.path.join(os.path.dirname(__file__), "..", "assets", "scroll-light.svg")
     user_path = os.path.join(os.path.dirname(__file__), "..", "assets", "user-light.svg")
     return document_path, user_path
 
+def get_quill():
+    """Load and return the PNG Quill icon"""
+    quill_path = os.path.join(os.path.dirname(__file__), "..", "assets", "quill.png")
+    return load_png_icon(quill_path)
+    
+
 
 def render_chat_interface():
     # Display chat history first (before processing any new input)
     document_avatar, user_avatar = get_default_avatar()
-    
+    quill_icon = get_quill()
+
     for role, msg in st.session_state.chat_history:
         is_user = role == "user"
         if is_user:
@@ -49,8 +56,11 @@ def render_chat_interface():
                     if chunk_data.get("answer_chunk"):
                         full_response += chunk_data["answer_chunk"]
                         # Update the message placeholder with accumulated text
-                        message_placeholder.markdown(full_response + "▌")
-                    
+                        # render the quill icon within the markdown window below
+                        message_placeholder.markdown(full_response + f"<img src='data:image/png;base64,{quill_icon}' style='width: 40px; height: 40px; display: inline; vertical-align: bottom; transform: translateY(-5px);'>", unsafe_allow_html=True)
+                        # message_placeholder.markdown(full_response + f"<img src='data:image/png;base64,{quill_icon}' style='width: 40px; height: 40px; display: inline;'>", unsafe_allow_html=True)
+                        # message_placeholder.markdown(full_response + "<span style='font-size: 2.0em;'>🪶</span>", unsafe_allow_html=True)
+
                     # Handle completed response
                     if chunk_data.get("is_complete"):
                         final_answer = chunk_data.get("answer", full_response)
@@ -65,7 +75,10 @@ def render_chat_interface():
                 elif response_metadata.get("is_off_topic"):
                     st.info("This question seems outside the document's scope.", icon=":material/info:")
                 elif response_metadata.get("error"):
-                    st.error("❌ An error occurred while processing your question.")
+                    st.error(f"❌ An error occurred while processing your question.")
+                    # Show detailed error in an expander for debugging
+                    with st.expander("Error Details (for debugging)", expanded=False):
+                        st.code(str(response_metadata.get("error")))
                 else:
                     # Show source information for successful queries
                     if source_docs:
@@ -89,7 +102,10 @@ def render_chat_interface():
                 st.info("This question seems outside the document's scope.", icon=":material/info:")
             elif result.get("error"):
                 reply = result["answer"]
-                st.error("An error occurred while processing your question.", icon=":material/error:")
+                st.error("An error occurred while processing your question.")
+                # Show detailed error in an expander for debugging
+                with st.expander("Error Details (for debugging)", expanded=False):
+                    st.code(str(result.get("error")))
             else:
                 reply = result["answer"]
                 # Show source information for successful queries
