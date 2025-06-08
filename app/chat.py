@@ -51,23 +51,74 @@ def render_chat_interface():
                 source_docs = []
                 response_metadata = {}
                 
-                # Stream the response
-                for chunk_data in st.session_state.qa_chain.query_stream(user_input):
-                    if chunk_data.get("answer_chunk"):
-                        full_response += chunk_data["answer_chunk"]
-                        # Update the message placeholder with accumulated text
-                        # render the quill icon within the markdown window below
-                        message_placeholder.markdown(full_response + f"<img src='data:image/png;base64,{quill_icon}' style='width: 40px; height: 40px; display: inline; vertical-align: bottom; transform: translateY(-5px);'>", unsafe_allow_html=True)
-                        # message_placeholder.markdown(full_response + f"<img src='data:image/png;base64,{quill_icon}' style='width: 40px; height: 40px; display: inline;'>", unsafe_allow_html=True)
-                        # message_placeholder.markdown(full_response + "<span style='font-size: 2.0em;'>🪶</span>", unsafe_allow_html=True)
-
-                    # Handle completed response
-                    if chunk_data.get("is_complete"):
-                        final_answer = chunk_data.get("answer", full_response)
-                        message_placeholder.markdown(final_answer)
-                        source_docs = chunk_data.get("source_documents", [])
-                        response_metadata = chunk_data
-                        break
+                # Get streaming configuration from session state
+                streaming_delay = st.session_state.get("streaming_delay", 0.02)
+                streaming_mode = st.session_state.get("streaming_mode", "character")
+                
+                if streaming_delay == 0 or streaming_mode == "instant":
+                    # No delay - stream directly as before for maximum performance
+                    for chunk_data in st.session_state.qa_chain.query_stream(user_input):
+                        if chunk_data.get("answer_chunk"):
+                            full_response += chunk_data["answer_chunk"]
+                            message_placeholder.markdown(
+                                full_response + f"<img src='data:image/png;base64,{quill_icon}' style='width: 40px; height: 40px; display: inline; vertical-align: bottom; transform: translateY(-5px);'>", 
+                                unsafe_allow_html=True
+                            )
+                        
+                        # Handle completed response
+                        if chunk_data.get("is_complete"):
+                            final_answer = chunk_data.get("answer", full_response)
+                            source_docs = chunk_data.get("source_documents", [])
+                            response_metadata = chunk_data
+                            break
+                else:
+                    # Collect streaming response in buffer, then animate
+                    text_buffer = []
+                    
+                    # First, collect all the streaming chunks
+                    for chunk_data in st.session_state.qa_chain.query_stream(user_input):
+                        if chunk_data.get("answer_chunk"):
+                            text_buffer.append(chunk_data["answer_chunk"])
+                        
+                        # Handle completed response
+                        if chunk_data.get("is_complete"):
+                            final_answer = chunk_data.get("answer", "".join(text_buffer))
+                            source_docs = chunk_data.get("source_documents", [])
+                            response_metadata = chunk_data
+                            break
+                    
+                    # Now animate the collected text
+                    full_text = "".join(text_buffer)
+                    displayed_text = ""
+                    
+                    if streaming_mode == "character":
+                        # Character by character animation
+                        for char in full_text:
+                            displayed_text += char
+                            message_placeholder.markdown(
+                                displayed_text + f"<img src='data:image/png;base64,{quill_icon}' style='width: 40px; height: 40px; display: inline; vertical-align: bottom; transform: translateY(-5px);'>", 
+                                unsafe_allow_html=True
+                            )
+                            time.sleep(streaming_delay)
+                    elif streaming_mode == "word":
+                        # Word by word animation
+                        words = full_text.split()
+                        for i, word in enumerate(words):
+                            if i == 0:
+                                displayed_text = word
+                            else:
+                                displayed_text += " " + word
+                            message_placeholder.markdown(
+                                displayed_text + f"<img src='data:image/png;base64,{quill_icon}' style='width: 40px; height: 40px; display: inline; vertical-align: bottom; transform: translateY(-5px);'>", 
+                                unsafe_allow_html=True
+                            )
+                            time.sleep(streaming_delay)
+                    
+                    full_response = displayed_text
+                
+                # Final cleanup - remove the quill icon and show final answer
+                final_answer = response_metadata.get("answer", full_response)
+                message_placeholder.markdown(final_answer)
                 
                 # Handle different response types after streaming is complete
                 if response_metadata.get("is_injection_attempt"):
