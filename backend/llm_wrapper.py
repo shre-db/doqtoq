@@ -17,7 +17,7 @@ load_dotenv()
 GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
 MISTRAL_API_KEY = os.getenv("MISTRAL_API_KEY")
 
-def get_google_chat_model(model_name: str = "gemini-1.5-flash", temperature: float = 0.7, streaming: bool = False) -> ChatGoogleGenerativeAI:
+def get_google_chat_model(model_name: str = "gemini-2.5-flash-preview-04-17", temperature: float = 0.7, streaming: bool = False) -> ChatGoogleGenerativeAI:
     """
     Returns a Gemini chat model using the Google Generative AI API.
     """

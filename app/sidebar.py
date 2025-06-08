@@ -60,6 +60,47 @@ def render_sidebar():
     )
     st.session_state.streaming_enabled = streaming_enabled
 
+    # Streaming delay control (only show when streaming is enabled)
+    if streaming_enabled:
+        # Streaming mode selection
+        streaming_mode = st.sidebar.selectbox(
+            "Streaming Animation Style",
+            options=["Character by Character", "Word by Word", "Instant"],
+            index=0,
+            help="Choose how text appears during streaming"
+        )
+        
+        if streaming_mode == "Character by Character":
+            streaming_delay = st.sidebar.slider(
+                "Character Speed",
+                min_value=0.005,
+                max_value=0.1,
+                value=0.02,
+                step=0.005,
+                format="%.3f",
+                help="Delay between characters (lower = faster typing)"
+            )
+            st.session_state.streaming_delay = streaming_delay
+            st.session_state.streaming_mode = "character"
+        elif streaming_mode == "Word by Word":
+            streaming_delay = st.sidebar.slider(
+                "Word Speed",
+                min_value=0.05,
+                max_value=0.5,
+                value=0.15,
+                step=0.05,
+                format="%.2f",
+                help="Delay between words (lower = faster appearance)"
+            )
+            st.session_state.streaming_delay = streaming_delay
+            st.session_state.streaming_mode = "word"
+        else:  # Instant
+            st.session_state.streaming_delay = 0.0
+            st.session_state.streaming_mode = "instant"
+    else:
+        st.session_state.streaming_delay = 0.0
+        st.session_state.streaming_mode = "instant"
+
     # Top-K for retriever
     top_k = st.sidebar.slider(
         "Number of Chunks to Retrieve (k)",

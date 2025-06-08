@@ -8,3 +8,14 @@ def load_svg_icon(icon_path):
     except Exception as e:
         print(f"Error loading icon {icon_path}: {e}")
         return None
+    
+def load_png_icon(icon_path):
+    """Load and return PNG icon as base64 encoded string"""
+    try:
+        with open(icon_path, 'rb') as f:
+            png_content = f.read()
+        import base64
+        return base64.b64encode(png_content).decode()
+    except Exception as e:
+        print(f"Error loading icon {icon_path}: {e}")
+        return None

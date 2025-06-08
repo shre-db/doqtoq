@@ -54,65 +54,141 @@ class DocumentRAG:
     
     def _initialize_pipeline(self):
         """Initialize the complete RAG pipeline."""
-        # 1. Chunk the document
-        chunks: list[Document] = chunk_document(self.file_path)
-        
-        # 2. Setup embeddings and vector store with flexible provider
-        # Clear existing vectorstore to ensure fresh start for new document
-        embedding_model = get_embedding_model(
-            provider=self.embedding_provider,
-            model_name=self.embedding_model
-        )
-        self.vectorstore = get_vectorstore(embedding_model, clear_existing=True)
-        store_embeddings(self.vectorstore, chunks)
-        
-        # 3. Setup retriever with configurable top_k
-        self.retriever = get_basic_retriever(self.vectorstore, k=self.top_k)
-        
-        # 4. Setup LLM with configurable temperature and streaming
-        if self.model_provider == "google":
-            self.llm = get_google_chat_model(temperature=self.temperature, streaming=self.streaming)
-        elif self.model_provider == "mistral":
-            self.llm = get_mistral_chat_model(temperature=self.temperature, streaming=self.streaming)
-        elif self.model_provider == "ollama":
-            self.llm = get_ollama_chat_model(temperature=self.temperature, streaming=self.streaming)
-        else:
-            raise ValueError("Invalid model provider. Choose 'google' or 'mistral' or 'ollama'.")
+        try:
+            # 1. Chunk the document
+            print(f"Loading and chunking document: {self.file_path}")
+            chunks: list[Document] = chunk_document(self.file_path)
+            if not chunks:
+                raise ValueError(f"No chunks created from document: {self.file_path}")
+                
+            print(f"Created {len(chunks)} chunks from document")
+            
+            # 2. Setup embeddings and vector store with flexible provider
+            # Clear existing vectorstore to ensure fresh start for new document
+            print(f"Setting up embeddings with provider: {self.embedding_provider}")
+            embedding_model = get_embedding_model(
+                provider=self.embedding_provider,
+                model_name=self.embedding_model
+            )
+            
+            print("Creating vectorstore...")
+            self.vectorstore = get_vectorstore(embedding_model, clear_existing=True)
+            
+            print("Storing embeddings...")
+            store_embeddings(self.vectorstore, chunks)
+            
+            # 3. Setup retriever with configurable top_k
+            print(f"Setting up retriever with top_k: {self.top_k}")
+            self.retriever = get_basic_retriever(self.vectorstore, k=self.top_k)
+            
+            # 4. Setup LLM with configurable temperature and streaming
+            print(f"Setting up LLM with provider: {self.model_provider}")
+            if self.model_provider == "google":
+                self.llm = get_google_chat_model(temperature=self.temperature, streaming=self.streaming)
+            elif self.model_provider == "mistral":
+                self.llm = get_mistral_chat_model(temperature=self.temperature, streaming=self.streaming)
+            elif self.model_provider == "ollama":
+                self.llm = get_ollama_chat_model(temperature=self.temperature, streaming=self.streaming)
+            else:
+                raise ValueError("Invalid model provider. Choose 'google' or 'mistral' or 'ollama'.")
 
-        # 5. Setup the RAG chain with document personality
-        self._setup_rag_chain()
+            # 5. Setup the RAG chain with document personality
+            print("Setting up RAG chain...")
+            self._setup_rag_chain()
+            
+            print("RAG pipeline initialization completed successfully")
+            
+        except Exception as e:
+            print(f"Error during RAG pipeline initialization: {e}")
+            print(f"Exception type: {type(e).__name__}")
+            raise
+
+    @staticmethod
+    def format_chat_history(history):
+        """Convert message objects to formatted string for prompt."""
+        if not history:
+            return ""
+        
+        # Handle both list of messages and string format
+        if isinstance(history, str):
+            return history
+        elif isinstance(history, list):
+            formatted_messages = []
+            for msg in history:
+                if hasattr(msg, 'content'):
+                    if msg.__class__.__name__ == 'HumanMessage':
+                        formatted_messages.append(f"Human: {msg.content}")
+                    elif msg.__class__.__name__ == 'AIMessage':
+                        formatted_messages.append(f"Document: {msg.content}")
+            return "\n".join(formatted_messages)
+        return ""
+    
+
+    def _get_similarity_metrics(self, question):
+        """Get similarity scores for the question."""
+        try:
+            if not self.vectorstore:
+                print(f"Warning: Vectorstore not initialized")
+                return {
+                    "similarity_score": 1.0,
+                    "avg_similarity": 1.0
+                }
+                
+            docs_with_scores = self.vectorstore.similarity_search_with_score(question, k=self.top_k)
+            if docs_with_scores:
+                scores = [score for _, score in docs_with_scores]
+                scores_dict = {
+                    "similarity_score": min(scores),
+                    "avg_similarity": sum(scores) / len(scores)
+                }
+                print(f"Scores: {scores_dict}")
+                return scores_dict
+            else:
+                print(f"Warning: No documents retrieved for similarity scoring")
+                return {
+                    "similarity_score": 1.0,
+                    "avg_similarity": 1.0
+                }
+        except Exception as e:
+            print(f"Warning: Could not get similarity scores: {e}")
+            print(f"Exception type: {type(e).__name__}")
+            return {
+                "similarity_score": 1.0,  # Default to high distance (low similarity)
+                "avg_similarity": 1.0
+            }
     
     def _setup_rag_chain(self):
         """Setup the RAG chain with document personality prompts."""
         prompt_template = load_prompt_template()
-        
         format_docs = lambda docs: "\n\n".join(doc.page_content for doc in docs)
-        
-        def format_chat_history(history):
-            """Convert message objects to formatted string for prompt."""
-            if not history:
+
+        format_chat_history = lambda history: format_chat_history(history)
+
+        # Helper function to safely get similarity metrics
+        def safe_get_similarity_metrics(question, metric_key):
+            try:
+                metrics = self._get_similarity_metrics(question)
+                return metrics.get(metric_key, 1.0)  # Default to high distance if key missing
+            except Exception as e:
+                print(f"Error getting {metric_key}: {e}")
+                return 1.0  # Default to high distance (low similarity)
+
+        # Helper function to safely get chat history
+        def safe_get_chat_history(x):
+            try:
+                return format_chat_history(self.memory.load_memory_variables({}).get("history", ""))
+            except Exception as e:
+                print(f"Error getting chat history: {e}")
                 return ""
-            
-            # Handle both list of messages and string format
-            if isinstance(history, str):
-                return history
-            elif isinstance(history, list):
-                formatted_messages = []
-                for msg in history:
-                    if hasattr(msg, 'content'):
-                        if msg.__class__.__name__ == 'HumanMessage':
-                            formatted_messages.append(f"Human: {msg.content}")
-                        elif msg.__class__.__name__ == 'AIMessage':
-                            formatted_messages.append(f"Document: {msg.content}")
-                return "\n".join(formatted_messages)
-            return ""
-        
-        # Create the chain with proper memory integration
+
+        # Create the chain with proper memory integration and similarity metrics
         self.chain = (
             {
                 "context": self.retriever | format_docs,
                 "question": RunnablePassthrough(),
-                "chat_history": lambda x: format_chat_history(self.memory.load_memory_variables({}).get("history", ""))
+                "chat_history": lambda x: safe_get_chat_history(x),
+                "similarity_score": lambda x: safe_get_similarity_metrics(x, "similarity_score"),
+                "avg_similarity": lambda x: safe_get_similarity_metrics(x, "avg_similarity")
             }
             | prompt_template
             | self.llm
@@ -255,6 +331,7 @@ Please provide context for: {question}
         
         # Enhanced off-topic detection with confidence scoring
         if self._is_query_off_topic_enhanced(retrieved_docs, question):
+            print(f"Yes, the query is off-topic and we're about the load the off topic prompt")
             return {
                 "answer": load_off_topic_prompt(),
                 "source_documents": [],
@@ -303,17 +380,19 @@ Please provide context for: {question}
         # Retrieve relevant documents
         retrieved_docs = self.retriever.get_relevant_documents(question)
         
-        # Enhanced off-topic detection with confidence scoring
-        if self._is_query_off_topic_enhanced(retrieved_docs, question):
-            yield {
-                "answer": load_off_topic_prompt(),
-                "source_documents": [],
-                "is_off_topic": True,
-                "confidence_score": 0.0,
-                "is_complete": True
-            }
-            return
-        
+        # # Enhanced off-topic detection with confidence scoring
+        # if self._is_query_off_topic_enhanced(retrieved_docs, question):
+        #     print(f"Yes, the query is off-topic and we're about the load the off topic prompt")
+        #     yield {
+        #         "answer": load_off_topic_prompt(),
+        #         "source_documents": [],
+        #         "is_off_topic": True,
+        #         "confidence_score": 0.0,
+        #         "is_complete": True
+        #     }
+        #     return
+        # print(f"No, the query is not off-topic")
+         
         # Generate streaming response using the RAG chain
         try:
             accumulated_response = ""
@@ -384,29 +463,58 @@ Please provide context for: {question}
         return None
     
     def _is_query_off_topic_enhanced(self, retrieved_docs: list, question: str) -> bool:
-        """Enhanced off-topic detection with better heuristics."""
-        # Original threshold check
-        if len(retrieved_docs) <= 0:
-            return True
-        
-        # Calculate average relevance score if available
-        if hasattr(retrieved_docs[0], 'metadata') and 'score' in retrieved_docs[0].metadata:
-            avg_score = sum(doc.metadata.get('score', 0) for doc in retrieved_docs) / len(retrieved_docs)
-            if avg_score < 0.3:  # Low relevance threshold
+        """Enhanced off-topic detection using cosine distance and content heuristics."""
+        try:
+            # Chroma returns cosine distance: lower is better, 0 = identical
+            docs_with_scores = self.vectorstore.similarity_search_with_score(question, k=self.top_k)
+
+            if docs_with_scores:
+                scores = [score for _, score in docs_with_scores]
+                min_score = min(scores)
+                avg_score = sum(scores) / len(scores)
+                print(f"Similarity scores for '{question}': min={min_score:.3f}, avg={avg_score:.3f}")
+
+
+                # Cosine distance interpretation:
+                # - 0.0 to 0.5: Very relevant
+                # - 0.5 to 0.8: Somewhat relevant  
+                # - 0.8 to 1.2: Barely relevant
+                # - >1.2: Likely off-topic (distance close to orthogonality)
+
+                if min_score > 0.8:
+                    return True
+
+                if avg_score > 0.9:
+                    return True
+
+        except Exception as e:
+            print(f"Warning: Could not get similarity scores: {e}")
+
+            # Fallback heuristics
+            if all(len(doc.page_content.strip()) < 30 for doc in retrieved_docs):
                 return True
-        
-        # Check for very generic questions that might not be document-specific
-        generic_patterns = [
-            r"what.*time.*is.*it",
-            r"what.*weather.*like",
-            r"tell.*me.*joke",
-            r"how.*are.*you.*today"
-        ]
-        
-        for pattern in generic_patterns:
-            if re.search(pattern, question.lower()):
-                return True
-        
+
+            # Lexical overlap heuristic
+            question_words = set(question.lower().split())
+            stop_words = {
+                'the', 'a', 'an', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for', 'of', 'with', 'by',
+                'is', 'are', 'was', 'were', 'be', 'been', 'being', 'have', 'has', 'had', 'do', 'does',
+                'did', 'will', 'would', 'could', 'should', 'may', 'might', 'can', 'this', 'that', 'these', 'those'
+            }
+            meaningful_question_words = question_words - stop_words
+
+            if len(meaningful_question_words) > 0:
+                has_content_overlap = False
+                for doc in retrieved_docs[:2]:
+                    doc_words = set(doc.page_content.lower().split())
+                    overlap = meaningful_question_words & doc_words
+                    if len(overlap) > 0:
+                        has_content_overlap = True
+                        break
+
+                if not has_content_overlap:
+                    return True
+
         return False
     
     def _calculate_confidence_score(self, retrieved_docs: list) -> float:
