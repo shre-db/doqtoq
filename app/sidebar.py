@@ -34,7 +34,7 @@ def render_sidebar():
     # Model selection
     model_choice = st.sidebar.selectbox(
         "Choose a Language Model",
-        options=["Gemini (Google)", "Mistral AI"],
+        options=["Gemini (Google)", "Mistral AI", "Ollama"],
         index=0,
         help="Select the LLM you'd like to use for answering questions."
     )

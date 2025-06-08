@@ -25,4 +25,5 @@ dependencies:
       - numpy
       - pandas
       - ollama
+      - langchain-ollama
       - pipreqs

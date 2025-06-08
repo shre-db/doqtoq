@@ -63,7 +63,7 @@ if uploaded_file:
         with st.spinner("Reading and indexing your document..."):
             # Get model provider from sidebar
             llm_choice = st.session_state.get("llm_choice", "Gemini (Google)")
-            model_provider = "google" if llm_choice == "Gemini (Google)" else "mistral"
+            model_provider = "google" if llm_choice == "Gemini (Google)" else "mistral" if llm_choice == "Mistral" else "ollama"
             print(f"Using model provider: {model_provider} (from choice: {llm_choice})")
             
             # Get embedding settings from sidebar
@@ -86,7 +86,7 @@ if uploaded_file:
     # Update settings if they've changed
     if st.session_state.qa_chain:
         llm_choice = st.session_state.get("llm_choice", "Gemini (Google)")
-        model_provider = "google" if llm_choice == "Gemini (Google)" else "mistral"
+        model_provider = "google" if llm_choice == "Gemini (Google)" else "mistral" if llm_choice == "Mistral" else "ollama"
         print(f"Updating settings for model provider: {model_provider} (from choice: {llm_choice})")
         temperature = st.session_state.get("temperature", 0.7)
         top_k = st.session_state.get("top_k", 4)

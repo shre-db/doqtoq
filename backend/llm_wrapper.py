@@ -2,8 +2,15 @@ __module_name__ = "llm_wrapper"
 
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_mistralai.chat_models import ChatMistralAI
+from langchain_ollama import ChatOllama
+from langchain_core.language_models.chat_models import BaseChatModel
+from langchain_core.messages import BaseMessage, HumanMessage, AIMessage, SystemMessage
+from langchain_core.outputs import ChatResult, ChatGeneration
+from langchain_core.callbacks.manager import CallbackManagerForLLMRun
 from dotenv import load_dotenv
 import os
+import ollama
+from typing import Any, Dict, Iterator, List, Optional
 
 load_dotenv()
 
@@ -44,3 +51,33 @@ def get_mistral_chat_model(model_name: str = "mistral-medium", temperature: floa
         )
     except Exception as e:
         raise ValueError(f"Failed to initialize Mistral chat model: {str(e)}")
+    
+
+def get_ollama_chat_model(model_name: str = "mistral:latest", temperature: float = 0.7, streaming: bool = True) -> ChatOllama:
+    """
+    Returns an Ollama chat model using the Ollama API.
+    
+    Args:
+        model_name: The Ollama model to use. Common options:
+                   - mistral:latest (default, 7B parameters)
+                   - gemma3:1b (faster, 1B parameters)
+                   - deepseek-r1:1.5b (alternative, 1.5B parameters)
+                   - llama3:8b (if available)
+        temperature: Sampling temperature (0.0 to 1.0)
+        streaming: Whether to enable streaming responses
+    
+    Returns:
+        ChatOllama instance ready for use
+        
+    Raises:
+        ValueError: If model initialization fails
+    """
+    print(f"Using Ollama model: {model_name}")
+    try:
+        return ChatOllama(
+            model=model_name,
+            temperature=temperature,
+            streaming=streaming,
+        )
+    except Exception as e:
+        raise ValueError(f"Failed to initialize Ollama chat model: {str(e)}")
