@@ -7,7 +7,7 @@ from backend.chunker import chunk_document
 from backend.embedder import get_embedding_model, EmbeddingProvider
 from backend.retriever import get_basic_retriever
 from backend.vectorstore.vector_db import get_vectorstore, store_embeddings
-from backend.llm_wrapper import get_google_chat_model, get_mistral_chat_model
+from backend.llm_wrapper import get_google_chat_model, get_mistral_chat_model, get_ollama_chat_model
 from backend.prompts.prompt_templates import load_prompt_template
 from backend.utils import (
     load_off_topic_prompt, 
@@ -23,7 +23,7 @@ from langchain_core.output_parsers import StrOutputParser
 from typing import Literal, Dict, Any, Iterator
 import re
 
-ModelProvider = Literal["google", "mistral"]
+ModelProvider = Literal["google", "mistral", "ollama"]
 
 class DocumentRAG:
     """
@@ -74,9 +74,11 @@ class DocumentRAG:
             self.llm = get_google_chat_model(temperature=self.temperature, streaming=self.streaming)
         elif self.model_provider == "mistral":
             self.llm = get_mistral_chat_model(temperature=self.temperature, streaming=self.streaming)
+        elif self.model_provider == "ollama":
+            self.llm = get_ollama_chat_model(temperature=self.temperature, streaming=self.streaming)
         else:
-            raise ValueError("Invalid model provider. Choose 'google' or 'mistral'.")
-        
+            raise ValueError("Invalid model provider. Choose 'google' or 'mistral' or 'ollama'.")
+
         # 5. Setup the RAG chain with document personality
         self._setup_rag_chain()
     
@@ -162,6 +164,9 @@ class DocumentRAG:
                 elif self.model_provider == "mistral":
                     print(f"Using Mistral model")
                     self.llm = get_mistral_chat_model(temperature=self.temperature, streaming=self.streaming)
+                elif self.model_provider == "ollama":
+                    print(f"Using Ollama model")
+                    self.llm = get_ollama_chat_model(temperature=self.temperature, streaming=self.streaming)
             
             if top_k is not None:
                 self.retriever = get_basic_retriever(self.vectorstore, k=self.top_k)
