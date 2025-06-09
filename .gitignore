@@ -53,6 +53,8 @@ vectorstore/index/
 !assets/*.svg
 !assets/*.png
 
+# Python files
+test_streaming_performance.py
 
 # Vectorstore files
 vectorstore/*.json
