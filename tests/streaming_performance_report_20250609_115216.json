@@ -1,0 +1,203 @@
+{
+  "timestamp": "20250609_115216",
+  "summary": {
+    "direct_streaming": {
+      "avg_first_chunk_ms": 6460.4843987358945,
+      "min_first_chunk_ms": 371.03843688964844,
+      "max_first_chunk_ms": 25496.395349502563
+    },
+    "producer_consumer_streaming": {
+      "avg_first_chunk_ms": 53.704023361206055,
+      "min_first_chunk_ms": 30.29179573059082,
+      "max_first_chunk_ms": 80.37614822387695,
+      "avg_overlap_ms": 29504.695945315892,
+      "avg_overlap_percentage": 99.98222222222222
+    },
+    "improvement": {
+      "avg_improvement_ms": 6406.780375374688,
+      "avg_improvement_percentage": 99.16873070118838
+    }
+  },
+  "detailed_results": [
+    {
+      "test_name": "Direct - Fast Animation - Response 1 (85 chars)",
+      "first_chunk_time_ms": 371.04,
+      "completion_time_ms": 1229.54,
+      "total_chunks": 9,
+      "producer_duration_ms": 371.03,
+      "consumer_duration_ms": 858.5,
+      "overlap_duration_ms": 0,
+      "overlap_percentage": 0.0
+    },
+    {
+      "test_name": "ProducerConsumer - Fast Animation - Response 1 (85 chars)",
+      "first_chunk_time_ms": 30.48,
+      "completion_time_ms": 888.98,
+      "total_chunks": 9,
+      "producer_duration_ms": 371.52,
+      "consumer_duration_ms": 888.62,
+      "overlap_duration_ms": 371.18,
+      "overlap_percentage": 99.91
+    },
+    {
+      "test_name": "Direct - Fast Animation - Response 2 (302 chars)",
+      "first_chunk_time_ms": 1033.18,
+      "completion_time_ms": 4083.56,
+      "total_chunks": 31,
+      "producer_duration_ms": 1033.17,
+      "consumer_duration_ms": 3050.38,
+      "overlap_duration_ms": 0,
+      "overlap_percentage": 0.0
+    },
+    {
+      "test_name": "ProducerConsumer - Fast Animation - Response 2 (302 chars)",
+      "first_chunk_time_ms": 30.29,
+      "completion_time_ms": 3080.46,
+      "total_chunks": 31,
+      "producer_duration_ms": 2151.65,
+      "consumer_duration_ms": 3080.27,
+      "overlap_duration_ms": 2151.48,
+      "overlap_percentage": 99.99
+    },
+    {
+      "test_name": "Direct - Fast Animation - Response 3 (3167 chars)",
+      "first_chunk_time_ms": 9644.66,
+      "completion_time_ms": 41640.66,
+      "total_chunks": 317,
+      "producer_duration_ms": 9644.65,
+      "consumer_duration_ms": 31996.01,
+      "overlap_duration_ms": 0,
+      "overlap_percentage": 0.0
+    },
+    {
+      "test_name": "ProducerConsumer - Fast Animation - Response 3 (3167 chars)",
+      "first_chunk_time_ms": 30.32,
+      "completion_time_ms": 32037.48,
+      "total_chunks": 317,
+      "producer_duration_ms": 31056.64,
+      "consumer_duration_ms": 32037.26,
+      "overlap_duration_ms": 31056.43,
+      "overlap_percentage": 100.0
+    },
+    {
+      "test_name": "Direct - Normal Animation - Response 1 (85 chars)",
+      "first_chunk_time_ms": 551.08,
+      "completion_time_ms": 2260.8,
+      "total_chunks": 9,
+      "producer_duration_ms": 551.07,
+      "consumer_duration_ms": 1709.73,
+      "overlap_duration_ms": 0,
+      "overlap_percentage": 0.0
+    },
+    {
+      "test_name": "ProducerConsumer - Normal Animation - Response 1 (85 chars)",
+      "first_chunk_time_ms": 50.39,
+      "completion_time_ms": 1759.48,
+      "total_chunks": 9,
+      "producer_duration_ms": 551.13,
+      "consumer_duration_ms": 1759.25,
+      "overlap_duration_ms": 550.91,
+      "overlap_percentage": 99.96
+    },
+    {
+      "test_name": "Direct - Normal Animation - Response 2 (302 chars)",
+      "first_chunk_time_ms": 1653.85,
+      "completion_time_ms": 7726.56,
+      "total_chunks": 31,
+      "producer_duration_ms": 1653.84,
+      "consumer_duration_ms": 6072.71,
+      "overlap_duration_ms": 0,
+      "overlap_percentage": 0.0
+    },
+    {
+      "test_name": "ProducerConsumer - Normal Animation - Response 2 (302 chars)",
+      "first_chunk_time_ms": 50.28,
+      "completion_time_ms": 6121.12,
+      "total_chunks": 31,
+      "producer_duration_ms": 4272.63,
+      "consumer_duration_ms": 6120.98,
+      "overlap_duration_ms": 4272.52,
+      "overlap_percentage": 100.0
+    },
+    {
+      "test_name": "Direct - Normal Animation - Response 3 (3167 chars)",
+      "first_chunk_time_ms": 15989.63,
+      "completion_time_ms": 79660.95,
+      "total_chunks": 317,
+      "producer_duration_ms": 15989.63,
+      "consumer_duration_ms": 63671.32,
+      "overlap_duration_ms": 0,
+      "overlap_percentage": 0.0
+    },
+    {
+      "test_name": "ProducerConsumer - Normal Animation - Response 3 (3167 chars)",
+      "first_chunk_time_ms": 50.46,
+      "completion_time_ms": 63740.78,
+      "total_chunks": 317,
+      "producer_duration_ms": 61789.26,
+      "consumer_duration_ms": 63740.51,
+      "overlap_duration_ms": 61789.01,
+      "overlap_percentage": 100.0
+    },
+    {
+      "test_name": "Direct - Slow Animation - Response 1 (85 chars)",
+      "first_chunk_time_ms": 820.98,
+      "completion_time_ms": 5080.51,
+      "total_chunks": 9,
+      "producer_duration_ms": 820.97,
+      "consumer_duration_ms": 4259.54,
+      "overlap_duration_ms": 0,
+      "overlap_percentage": 0.0
+    },
+    {
+      "test_name": "ProducerConsumer - Slow Animation - Response 1 (85 chars)",
+      "first_chunk_time_ms": 80.37,
+      "completion_time_ms": 4339.78,
+      "total_chunks": 9,
+      "producer_duration_ms": 821.17,
+      "consumer_duration_ms": 4339.58,
+      "overlap_duration_ms": 820.98,
+      "overlap_percentage": 99.98
+    },
+    {
+      "test_name": "Direct - Slow Animation - Response 2 (302 chars)",
+      "first_chunk_time_ms": 2583.56,
+      "completion_time_ms": 17713.88,
+      "total_chunks": 31,
+      "producer_duration_ms": 2583.55,
+      "consumer_duration_ms": 15130.33,
+      "overlap_duration_ms": 0,
+      "overlap_percentage": 0.0
+    },
+    {
+      "test_name": "ProducerConsumer - Slow Animation - Response 2 (302 chars)",
+      "first_chunk_time_ms": 80.37,
+      "completion_time_ms": 15214.07,
+      "total_chunks": 31,
+      "producer_duration_ms": 10604.69,
+      "consumer_duration_ms": 15213.9,
+      "overlap_duration_ms": 10604.53,
+      "overlap_percentage": 100.0
+    },
+    {
+      "test_name": "Direct - Slow Animation - Response 3 (3167 chars)",
+      "first_chunk_time_ms": 25496.4,
+      "completion_time_ms": 184184.61,
+      "total_chunks": 317,
+      "producer_duration_ms": 25496.39,
+      "consumer_duration_ms": 158688.22,
+      "overlap_duration_ms": 0,
+      "overlap_percentage": 0.0
+    },
+    {
+      "test_name": "ProducerConsumer - Slow Animation - Response 3 (3167 chars)",
+      "first_chunk_time_ms": 80.38,
+      "completion_time_ms": 158785.02,
+      "total_chunks": 317,
+      "producer_duration_ms": 153925.49,
+      "consumer_duration_ms": 158784.74,
+      "overlap_duration_ms": 153925.23,
+      "overlap_percentage": 100.0
+    }
+  ]
+}

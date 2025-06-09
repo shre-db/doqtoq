@@ -78,7 +78,6 @@ def get_ollama_chat_model(model_name: str = "mistral:latest", temperature: float
             model=model_name,
             temperature=temperature,
             streaming=streaming,
-            num_gpu=0,
         )
     except Exception as e:
         raise ValueError(f"Failed to initialize Ollama chat model: {str(e)}")
