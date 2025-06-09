@@ -128,16 +128,25 @@ def render_chat_interface():
                                 low_count = similarity_metrics.get('low_similarity_count', 0)
                                 
                                 if medium_count > 0 or low_count > 0:
-                                    st.write(f"*Breakdown: {high_relevance_count} high relevance, {medium_count} medium relevance, {low_count} low relevance*")
-                                    
+                                    # Create colored tags for relevance breakdown
+                                    st.markdown(f"""
+                                    <span style='background-color: #28a745; color: white; padding: 4px 8px; border-radius: 5px; font-size: 0.8em; font-weight: regular; display: inline-flex; align-items: center; justify-content: center; line-height: 1; margin-right: 6px;'>High: {high_relevance_count}</span>
+                                    <span style='background-color: #ffc107; color: black; padding: 4px 8px; border-radius: 5px; font-size: 0.8em; font-weight: regular; display: inline-flex; align-items: center; justify-content: center; line-height: 1; margin-right: 6px;'>Medium: {medium_count}</span>
+                                    <span style='background-color: #dc3545; color: white; padding: 4px 8px; border-radius: 5px; font-size: 0.8em; font-weight: regular; display: inline-flex; align-items: center; justify-content: center; line-height: 1;'>Low: {low_count}</span>
+                                    """, unsafe_allow_html=True)
+                                        
                                 # Show score details in plain text instead of nested expander
-                                st.write("**Score Details:**")
-                                st.write(f"- Relevance Threshold: < {similarity_metrics.get('relevance_threshold', 0.8)} (cosine distance)")
-                                st.write(f"- Best Score: {similarity_metrics.get('min_score', 'N/A'):.3f}")
-                                st.write(f"- Average Score: {similarity_metrics.get('avg_score', 'N/A'):.3f}")
+                                st.markdown("")
+                                st.markdown("##### Score Details")
+                                st.markdown(f"""
+                                - **Relevance Threshold:** < `{similarity_metrics.get('relevance_threshold', 0.8)}` (cosine distance)
+                                - **Best Score:** `{similarity_metrics.get('min_score', 'N/A'):.3f}`
+                                - **Worst Score:** `{similarity_metrics.get('max_score', 'N/A'):.3f}`
+                                - **Average Score:** `{similarity_metrics.get('avg_score', 'N/A'):.3f}`
+                                """)
                             else:
-                                st.write(f"Found {len(source_docs)} relevant sections in the document.")
-            
+                                st.markdown(f"Found {len(source_docs)} relevant sections in the document.")
+
             # Add both messages to chat history after streaming is complete
             st.session_state.chat_history.append(("user", user_input))
             st.session_state.chat_history.append(("doc", final_answer))
@@ -180,18 +189,29 @@ def render_chat_interface():
                             
                             # Show detailed breakdown
                             if medium_relevance_count > 0 or low_relevance_count > 0:
-                                st.write(f"Relevance breakdown: {high_relevance_count} high, {medium_relevance_count} medium, {low_relevance_count} low")
-                            
+                                # Create colored tags for relevance breakdown with minimal gaps
+                                st.markdown(f"""
+                                <span style='background-color: #28a745; color: white; padding: 4px 8px; border-radius: 5px; font-size: 0.8em; font-weight: regular; display: inline-flex; align-items: center; justify-content: center; line-height: 1; margin-right: 4px;'>High: {high_relevance_count}</span>
+                                <span style='background-color: #ffc107; color: black; padding: 4px 8px; border-radius: 5px; font-size: 0.8em; font-weight: regular; display: inline-flex; align-items: center; justify-content: center; line-height: 1; margin-right: 4px;'>Medium: {medium_relevance_count}</span>
+                                <span style='background-color: #dc3545; color: white; padding: 4px 8px; border-radius: 5px; font-size: 0.8em; font-weight: regular; display: inline-flex; align-items: center; justify-content: center; line-height: 1;'>Low: {low_relevance_count}</span>
+                                """, unsafe_allow_html=True)
                             # Add score details in plain text instead of nested expander
-                            st.write("**Score Details:**")
-                            st.write(f"- Relevance Threshold: {similarity_metrics.get('relevance_threshold', 0.8)} (cosine distance)")
-                            if 'min_score' in similarity_metrics:
-                                st.write(f"- Score Range: {similarity_metrics['min_score']:.3f} - {similarity_metrics.get('max_score', 'N/A'):.3f}")
-                            if 'avg_score' in similarity_metrics:
-                                st.write(f"- Average Score: {similarity_metrics['avg_score']:.3f}")
+                            st.markdown("")
+                            st.markdown("""
+                            ##### Score Details
+                            - **Relevance Threshold:** < `{:.3f}` (cosine distance)
+                            - **Best Score:** `{:.3f}`
+                            - **Worst Score:** `{:.3f}`
+                            - **Average Score:** `{:.3f}`
+                            """.format(
+                                similarity_metrics.get('relevance_threshold', 0.8),
+                                similarity_metrics.get('min_score', 0),
+                                similarity_metrics.get('max_score', 0),
+                                similarity_metrics.get('avg_score', 0)
+                            ))
                         else:
                             # Fallback to original display if metrics unavailable
-                            st.write(f"Found {len(result['source_documents'])} relevant sections in the document.")
+                            st.markdown(f"Found {len(result['source_documents'])} relevant sections in the document.")
 
             # Display the response immediately
             with st.chat_message("assistant", avatar=document_avatar):
