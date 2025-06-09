@@ -5,7 +5,7 @@ import sys
 project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, project_root)
 import streamlit as st
-st.set_page_config(page_title="DoqToq", page_icon=":material/folder_open:", layout="wide")
+st.set_page_config(page_title="DoqToq", page_icon=":material/folder_open:", layout="centered", initial_sidebar_state="collapsed")
 from app.uploader import handle_upload
 from app.chat import render_chat_interface
 from app.config import init_session_state
