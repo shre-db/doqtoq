@@ -15,7 +15,7 @@ from backend.utils import (
     is_query_off_topic,
     is_potential_prompt_injection
 )
-
+import streamlit as st
 from langchain_core.documents import Document
 from langchain_core.runnables import RunnablePassthrough
 from langchain_core.output_parsers import StrOutputParser
@@ -142,6 +142,30 @@ class DocumentRAG:
                     "avg_similarity": sum(scores) / len(scores)
                 }
                 print(f"Scores: {scores_dict}")
+                
+                # Enhanced metrics for UI display - count documents above threshold
+                # For cosine distance: lower is better, so we count docs below 0.8 threshold
+                high_similarity_docs = [score for score in scores if score < 0.8]
+                medium_similarity_docs = [score for score in scores if 0.5 <= score < 0.8]
+                low_similarity_docs = [score for score in scores if score >= 0.8]
+                
+                # Prepare similarity data for UI use
+                similarity_data = {
+                    "total_docs": len(scores),
+                    "high_similarity_count": len(high_similarity_docs),  # < 0.8 distance
+                    "medium_similarity_count": len(medium_similarity_docs),  # 0.5-0.8 distance
+                    "low_similarity_count": len(low_similarity_docs),  # >= 0.8 distance
+                    "raw_scores": scores,
+                    "min_score": min(scores),
+                    "avg_score": sum(scores) / len(scores),
+                    "max_score": max(scores),
+                    "relevance_threshold": 0.8
+                }
+                
+                print(f"Calculated similarity metrics: {len(high_similarity_docs)} high-relevance docs out of {len(scores)} total")
+                
+                # Return both original scores and enhanced metrics
+                scores_dict.update(similarity_data)
                 return scores_dict
             else:
                 print(f"Warning: No documents retrieved for similarity scoring")
@@ -329,6 +353,9 @@ Please provide context for: {question}
         # Retrieve relevant documents
         retrieved_docs = self.retriever.get_relevant_documents(enhanced_query)
         
+        # Calculate and store similarity metrics for UI display
+        similarity_metrics = self._get_similarity_metrics(question)
+        
         # Enhanced off-topic detection with confidence scoring
         if self._is_query_off_topic_enhanced(retrieved_docs, question):
             print(f"Yes, the query is off-topic and we're about the load the off topic prompt")
@@ -354,7 +381,8 @@ Please provide context for: {question}
                 "source_documents": retrieved_docs,
                 "is_injection_attempt": False,
                 "is_off_topic": False,
-                "confidence_score": self._calculate_confidence_score(retrieved_docs)
+                "confidence_score": self._calculate_confidence_score(retrieved_docs),
+                "similarity_metrics": similarity_metrics
             }
         except Exception as e:
             return {
@@ -379,6 +407,9 @@ Please provide context for: {question}
         
         # Retrieve relevant documents
         retrieved_docs = self.retriever.get_relevant_documents(question)
+        
+        # Calculate and store similarity metrics for UI display
+        similarity_metrics = self._get_similarity_metrics(question)
         
         # # Enhanced off-topic detection with confidence scoring
         # if self._is_query_off_topic_enhanced(retrieved_docs, question):
@@ -421,6 +452,7 @@ Please provide context for: {question}
                 "is_injection_attempt": False,
                 "is_off_topic": False,
                 "confidence_score": self._calculate_confidence_score(retrieved_docs),
+                "similarity_metrics": similarity_metrics,
                 "is_complete": True
             }
                 

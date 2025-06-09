@@ -69,6 +69,10 @@ def render_chat_interface():
                             final_answer = chunk_data.get("answer", full_response)
                             source_docs = chunk_data.get("source_documents", [])
                             response_metadata = chunk_data
+                            
+                            # Store similarity metrics if available
+                            if chunk_data.get("similarity_metrics"):
+                                st.session_state['similarity_metrics'] = chunk_data["similarity_metrics"]
                             break
                 else:
                     # Use new queue-based streaming with shock absorber pattern
@@ -88,6 +92,10 @@ def render_chat_interface():
                     final_answer = result.get("answer", full_response)
                     source_docs = result.get("source_documents", [])
                     response_metadata = result
+                    
+                    # Store similarity metrics in session state if available
+                    if result.get("similarity_metrics"):
+                        st.session_state['similarity_metrics'] = result["similarity_metrics"]
                 
                 # Final cleanup - remove the quill icon and show final answer
                 final_answer = response_metadata.get("answer", full_response)
@@ -106,8 +114,29 @@ def render_chat_interface():
                 else:
                     # Show source information for successful queries
                     if source_docs:
+                        # Get meaningful similarity metrics from session state
+                        similarity_metrics = st.session_state.get('similarity_metrics', {})
+                        high_relevance_count = similarity_metrics.get('high_similarity_count', len(source_docs))
+                        total_docs = similarity_metrics.get('total_docs', len(source_docs))
+                        
                         with st.expander("Source Information", icon=":material/newsstand:", expanded=False):
-                            st.write(f"Found {len(source_docs)} relevant sections in the document.")
+                            if similarity_metrics:
+                                st.write(f"Found **{high_relevance_count} highly relevant** sections out of {total_docs} retrieved.")
+                                
+                                # Show detailed breakdown
+                                medium_count = similarity_metrics.get('medium_similarity_count', 0)
+                                low_count = similarity_metrics.get('low_similarity_count', 0)
+                                
+                                if medium_count > 0 or low_count > 0:
+                                    st.write(f"*Breakdown: {high_relevance_count} high relevance, {medium_count} medium relevance, {low_count} low relevance*")
+                                    
+                                # Show score details in plain text instead of nested expander
+                                st.write("**Score Details:**")
+                                st.write(f"- Relevance Threshold: < {similarity_metrics.get('relevance_threshold', 0.8)} (cosine distance)")
+                                st.write(f"- Best Score: {similarity_metrics.get('min_score', 'N/A'):.3f}")
+                                st.write(f"- Average Score: {similarity_metrics.get('avg_score', 'N/A'):.3f}")
+                            else:
+                                st.write(f"Found {len(source_docs)} relevant sections in the document.")
             
             # Add both messages to chat history after streaming is complete
             st.session_state.chat_history.append(("user", user_input))
@@ -116,6 +145,10 @@ def render_chat_interface():
         else:
             # Use the original non-streaming query method
             result = st.session_state.qa_chain.query(user_input)
+            
+            # Store similarity metrics in session state if available
+            if result.get("similarity_metrics"):
+                st.session_state['similarity_metrics'] = result["similarity_metrics"]
             
             # Handle different response types based on safety checks
             if result.get("is_injection_attempt"):
@@ -135,7 +168,30 @@ def render_chat_interface():
                 # Show source information for successful queries
                 if result["source_documents"]:
                     with st.expander("Source Information", expanded=False, icon=":material/newsstand:"):
-                        st.write(f"Found {len(result['source_documents'])} relevant sections in the document.")
+                        # Use similarity metrics if available, otherwise fall back to simple count
+                        similarity_metrics = st.session_state.get('similarity_metrics', {})
+                        if similarity_metrics:
+                            high_relevance_count = similarity_metrics.get('high_similarity_count', 0)
+                            medium_relevance_count = similarity_metrics.get('medium_similarity_count', 0)
+                            low_relevance_count = similarity_metrics.get('low_similarity_count', 0)
+                            total_docs = len(result['source_documents'])
+                            
+                            st.write(f"Found **{high_relevance_count} highly relevant** sections out of {total_docs} retrieved.")
+                            
+                            # Show detailed breakdown
+                            if medium_relevance_count > 0 or low_relevance_count > 0:
+                                st.write(f"Relevance breakdown: {high_relevance_count} high, {medium_relevance_count} medium, {low_relevance_count} low")
+                            
+                            # Add score details in plain text instead of nested expander
+                            st.write("**Score Details:**")
+                            st.write(f"- Relevance Threshold: {similarity_metrics.get('relevance_threshold', 0.8)} (cosine distance)")
+                            if 'min_score' in similarity_metrics:
+                                st.write(f"- Score Range: {similarity_metrics['min_score']:.3f} - {similarity_metrics.get('max_score', 'N/A'):.3f}")
+                            if 'avg_score' in similarity_metrics:
+                                st.write(f"- Average Score: {similarity_metrics['avg_score']:.3f}")
+                        else:
+                            # Fallback to original display if metrics unavailable
+                            st.write(f"Found {len(result['source_documents'])} relevant sections in the document.")
 
             # Display the response immediately
             with st.chat_message("assistant", avatar=document_avatar):
