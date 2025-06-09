@@ -5,6 +5,7 @@ import os
 import time
 from streamlit_chat import message
 from utils import load_svg_icon, load_png_icon
+from app.streaming_queue import handle_streamed_response
 
 def get_default_avatar():
     document_path = os.path.join(os.path.dirname(__file__), "..", "assets", "scroll-light.svg")
@@ -16,8 +17,6 @@ def get_quill():
     quill_path = os.path.join(os.path.dirname(__file__), "..", "assets", "quill.png")
     return load_png_icon(quill_path)
     
-
-
 def render_chat_interface():
     # Display chat history first (before processing any new input)
     document_avatar, user_avatar = get_default_avatar()
@@ -72,49 +71,23 @@ def render_chat_interface():
                             response_metadata = chunk_data
                             break
                 else:
-                    # Collect streaming response in buffer, then animate
-                    text_buffer = []
+                    # Use new queue-based streaming with shock absorber pattern
+                    stream_source = st.session_state.qa_chain.query_stream(user_input)
                     
-                    # First, collect all the streaming chunks
-                    for chunk_data in st.session_state.qa_chain.query_stream(user_input):
-                        if chunk_data.get("answer_chunk"):
-                            text_buffer.append(chunk_data["answer_chunk"])
-                        
-                        # Handle completed response
-                        if chunk_data.get("is_complete"):
-                            final_answer = chunk_data.get("answer", "".join(text_buffer))
-                            source_docs = chunk_data.get("source_documents", [])
-                            response_metadata = chunk_data
-                            break
+                    # Handle streaming with queue-based approach
+                    result = handle_streamed_response(
+                        stream_source=stream_source,
+                        message_placeholder=message_placeholder,
+                        quill_icon=quill_icon,
+                        streaming_mode=streaming_mode,
+                        streaming_delay=streaming_delay
+                    )
                     
-                    # Now animate the collected text
-                    full_text = "".join(text_buffer)
-                    displayed_text = ""
-                    
-                    if streaming_mode == "character":
-                        # Character by character animation
-                        for char in full_text:
-                            displayed_text += char
-                            message_placeholder.markdown(
-                                displayed_text + f"<img src='data:image/png;base64,{quill_icon}' style='width: 40px; height: 40px; display: inline; vertical-align: bottom; transform: translateY(-5px);'>", 
-                                unsafe_allow_html=True
-                            )
-                            time.sleep(streaming_delay)
-                    elif streaming_mode == "word":
-                        # Word by word animation
-                        words = full_text.split()
-                        for i, word in enumerate(words):
-                            if i == 0:
-                                displayed_text = word
-                            else:
-                                displayed_text += " " + word
-                            message_placeholder.markdown(
-                                displayed_text + f"<img src='data:image/png;base64,{quill_icon}' style='width: 40px; height: 40px; display: inline; vertical-align: bottom; transform: translateY(-5px);'>", 
-                                unsafe_allow_html=True
-                            )
-                            time.sleep(streaming_delay)
-                    
-                    full_response = displayed_text
+                    # Extract results from the queue-based streaming
+                    full_response = result.get("final_text", "")
+                    final_answer = result.get("answer", full_response)
+                    source_docs = result.get("source_documents", [])
+                    response_metadata = result
                 
                 # Final cleanup - remove the quill icon and show final answer
                 final_answer = response_metadata.get("answer", full_response)
