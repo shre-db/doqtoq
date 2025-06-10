@@ -84,7 +84,8 @@ def render_chat_interface():
                         message_placeholder=message_placeholder,
                         quill_icon=quill_icon,
                         streaming_mode=streaming_mode,
-                        streaming_delay=streaming_delay
+                        streaming_delay=streaming_delay,
+                        debug=True  # Enable debugging to see raw LLM response structure
                     )
                     
                     # Extract results from the queue-based streaming
