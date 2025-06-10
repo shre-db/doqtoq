@@ -242,7 +242,10 @@ class StreamlitStreamingManager:
                                         unsafe_allow_html=True
                                     )
                                     if streaming_delay > 0:
-                                        time.sleep(streaming_delay)
+                                        # Apply delay proportional to content length to maintain consistent pacing
+                                        # For LaTeX expressions, this ensures the pace doesn't suddenly speed up
+                                        delay_multiplier = len(char_to_display)
+                                        time.sleep(streaming_delay * delay_multiplier)
                         elif mode == StreamingMode.WORD:
                             # Word mode - animate each word with LaTeX awareness
                             words_to_display = latex_buffer.add_text(chunk_text)
@@ -259,7 +262,9 @@ class StreamlitStreamingManager:
                                         unsafe_allow_html=True
                                     )
                                     if i < len(words) - 1 and streaming_delay > 0:
-                                        time.sleep(streaming_delay)
+                                        # Apply longer delay for LaTeX expressions to maintain consistent pacing
+                                        delay_multiplier = max(1, len(word) // 5) if '$' in word else 1
+                                        time.sleep(streaming_delay * delay_multiplier)
                 
                 except queue.Empty:
                     continue
