@@ -43,7 +43,7 @@ else:
     # Fallback to emoji if icon can't be loaded
     st.markdown('<h1 class="doqtoq-title">📄 DoqToq</h1>', unsafe_allow_html=True)
 
-uploaded_file = st.file_uploader("Upload a PDF, TXT or JSON document", type=["pdf", "txt", "json"])
+uploaded_file = st.file_uploader("Upload a PDF, TXT, JSON or Markdown document", type=["pdf", "txt", "json", "md"])
 
 if uploaded_file:
     file_path = handle_upload(uploaded_file)
