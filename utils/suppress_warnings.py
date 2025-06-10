@@ -13,10 +13,15 @@ def setup_environment():
     os.environ["TORCH_WARN"] = "0"
     os.environ["PYTORCH_DISABLE_TORCH_FUNCTION_WARN"] = "1"
     
+    # Fix for PyTorch 2.7+ compatibility with Streamlit file watcher
+    os.environ["STREAMLIT_DISABLE_WATCHDOG_WARNING"] = "1"
+    os.environ["STREAMLIT_FILE_WATCHER_TYPE"] = "none"
+    
     # Suppress other common warnings
     warnings.filterwarnings("ignore", category=DeprecationWarning)
     warnings.filterwarnings("ignore", category=FutureWarning)
     warnings.filterwarnings("ignore", category=UserWarning, module="torch")
+    warnings.filterwarnings("ignore", category=RuntimeError, module="torch")
     
     # Set up additional environment variables for better performance
     os.environ["TOKENIZERS_PARALLELISM"] = "false"  # Prevents huggingface tokenizer warnings
