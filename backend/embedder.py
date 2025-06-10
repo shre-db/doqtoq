@@ -1,6 +1,5 @@
 __module_name__ = "embedder"
 
-from langchain_community.embeddings import HuggingFaceBgeEmbeddings
 from langchain_huggingface import HuggingFaceEmbeddings
 from langchain.embeddings.base import Embeddings
 from typing import Literal, Dict, Any, List
@@ -106,7 +105,7 @@ def _get_huggingface_embeddings(model_name: str, **kwargs):
     }
     default_kwargs.update(kwargs)
     
-    return HuggingFaceBgeEmbeddings(**default_kwargs)
+    return HuggingFaceEmbeddings(**default_kwargs)
 
 def _get_mistral_embeddings(model_name: str, **kwargs):
     """Get Mistral embeddings."""
@@ -174,4 +173,4 @@ def get_model_info(provider: EmbeddingProvider, model_name: str) -> Dict[str, An
 # Backward compatibility
 def get_embedding_model_legacy(model_name: str = "sentence-transformers/all-MiniLM-L6-v2"):
     """Legacy function for backward compatibility."""
-    return HuggingFaceBgeEmbeddings(model_name=model_name)
+    return HuggingFaceEmbeddings(model_name=model_name)
