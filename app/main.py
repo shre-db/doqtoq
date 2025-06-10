@@ -2,8 +2,31 @@ __module_name__ = "main"
 
 import os
 import sys
+import warnings
+
+# Setup environment to suppress warnings before any other imports
+os.environ["TORCH_WARN"] = "0"
+os.environ["PYTORCH_DISABLE_TORCH_FUNCTION_WARN"] = "1"
+os.environ["TOKENIZERS_PARALLELISM"] = "false"
+# Fix for PyTorch 2.7+ compatibility with Streamlit file watcher
+os.environ["STREAMLIT_DISABLE_WATCHDOG_WARNING"] = "1"
+os.environ["STREAMLIT_FILE_WATCHER_TYPE"] = "none"
+
+warnings.filterwarnings("ignore", category=DeprecationWarning)
+warnings.filterwarnings("ignore", category=FutureWarning)
+warnings.filterwarnings("ignore", category=UserWarning, module="torch")
+warnings.filterwarnings("ignore", category=UserWarning, message=".*torch.*")
+
 project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, project_root)
+
+# Apply PyTorch compatibility fixes before importing Streamlit
+try:
+    from utils.torch_compatibility import apply_streamlit_fixes
+    apply_streamlit_fixes()
+except ImportError:
+    print("Warning: Could not import torch compatibility fixes")
+
 import streamlit as st
 st.set_page_config(page_title="DoqToq", page_icon=":material/folder_open:", layout="centered", initial_sidebar_state="collapsed")
 from app.uploader import handle_upload

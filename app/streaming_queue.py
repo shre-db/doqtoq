@@ -29,7 +29,7 @@ class LaTeXDebugLogger:
         
         if self.enabled:
             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-            self.log_file = open(f"latex_streaming_debug_{timestamp}.log", "w", encoding="utf-8")
+            self.log_file = open(f"./logs/latex_streaming_debug_{timestamp}.log", "w", encoding="utf-8")
             self.log("=== LaTeX Streaming Debug Session Started ===\n")
     
     def log(self, message: str):

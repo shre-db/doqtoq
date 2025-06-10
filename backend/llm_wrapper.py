@@ -29,7 +29,7 @@ def get_google_chat_model(model_name: str = "gemini-2.5-flash-preview-04-17", te
             google_api_key=GOOGLE_API_KEY,
             temperature=temperature,
             top_p=1.0,
-            streaming=streaming,
+            disable_streaming=not streaming,  # Use disable_streaming instead of streaming
         )
     except Exception as e:
         raise ValueError(f"Failed to initialize Google chat model: {str(e)}")
