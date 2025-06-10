@@ -1,7 +1,8 @@
 __module_name__ = "rag_engine"
 
-from langchain.memory import ConversationSummaryBufferMemory
-from langchain.schema import HumanMessage, AIMessage, SystemMessage
+from langchain_community.chat_message_histories import ChatMessageHistory
+from langchain_core.messages import HumanMessage, AIMessage, SystemMessage
+from langchain_core.runnables.history import RunnableWithMessageHistory
 
 from backend.chunker import chunk_document
 from backend.embedder import get_embedding_model, EmbeddingProvider
@@ -45,12 +46,8 @@ class DocumentRAG:
         self.retriever = None
         self.llm = None
         self.chain = None
+        self.chat_history = ChatMessageHistory()
         self._initialize_pipeline()
-        self.memory = ConversationSummaryBufferMemory(
-            llm=self.llm,
-            max_token_limit=1000,
-            return_messages=True
-        )
     
     def _initialize_pipeline(self):
         """Initialize the complete RAG pipeline."""
@@ -200,7 +197,7 @@ class DocumentRAG:
         # Helper function to safely get chat history
         def safe_get_chat_history(x):
             try:
-                return format_chat_history(self.memory.load_memory_variables({}).get("history", ""))
+                return format_chat_history(self.chat_history.messages)
             except Exception as e:
                 print(f"Error getting chat history: {e}")
                 return ""
@@ -277,19 +274,17 @@ class DocumentRAG:
 
     def _enhance_query_with_context(self, question: str) -> str:
         """Enhance the query with relevant conversation context."""
-        memory_vars = self.memory.load_memory_variables({})
-        history = memory_vars.get("history", [])
+        history = self.chat_history.messages
 
         if not history:
             return question
         
-        # Get last few exchanges for context (consistent across data types)
+        # Get last few exchanges for context
         recent_context = []
         max_exchanges = 2  # Number of Q&A pairs to include
         
-        # Handle both list of messages and string format consistently
-        if isinstance(history, list):
-            # Take last 4 messages (2 exchanges: 2 questions + 2 answers)
+        # Take last 4 messages (2 exchanges: 2 questions + 2 answers)
+        if len(history) > 0:
             last_messages = history[-(max_exchanges * 2):]
             for msg in last_messages:
                 if hasattr(msg, 'content'):
@@ -297,41 +292,16 @@ class DocumentRAG:
                         recent_context.append(f"Previous question: {msg.content}")
                     elif msg.__class__.__name__ == 'AIMessage':
                         recent_context.append(f"Previous answer: {msg.content[:200]}...")
-        elif isinstance(history, str):
-            # Parse string format to extract last 2 exchanges consistently
-            # Split by common patterns and take equivalent content
-            lines = history.strip().split('\n')
-            relevant_lines = []
-            
-            # Look for the last few Human/Document exchanges
-            human_count = 0
-            doc_count = 0
-            for line in reversed(lines):
-                if line.startswith('Human:') and human_count < max_exchanges:
-                    relevant_lines.insert(0, f"Previous question: {line[7:].strip()}")
-                    human_count += 1
-                elif line.startswith('Document:') and doc_count < max_exchanges:
-                    content = line[10:].strip()
-                    relevant_lines.insert(0, f"Previous answer: {content[:200]}...")
-                    doc_count += 1
-                
-                # Stop when we have enough exchanges
-                if human_count >= max_exchanges and doc_count >= max_exchanges:
-                    break
-            
-            recent_context = relevant_lines
 
         # Combine the recent context into a single string
         if recent_context:
             context_string = "\n".join(recent_context)
-            enhanced_query = f"""
-Given this recent conversation context:
+            enhanced_query = f"""Given this recent conversation context:
 {context_string}
 
 Current question: {question}
 
-Please provide context for: {question}
-"""
+Please provide context for: {question}"""
             return enhanced_query
         return question
 
@@ -370,11 +340,9 @@ Please provide context for: {question}
         try:
             response = self.chain.invoke(question)
 
-            # Save to memory with correct format
-            self.memory.save_context(
-                inputs={"input": question},
-                outputs={"output": response}
-            )
+            # Save to chat history
+            self.chat_history.add_user_message(question)
+            self.chat_history.add_ai_message(response)
             
             return {
                 "answer": response,
@@ -439,11 +407,9 @@ Please provide context for: {question}
                     "is_complete": False
                 }
             
-            # Save to memory after streaming is complete
-            self.memory.save_context(
-                inputs={"input": question},
-                outputs={"output": accumulated_response}
-            )
+            # Save to chat history after streaming is complete
+            self.chat_history.add_user_message(question)
+            self.chat_history.add_ai_message(accumulated_response)
             
             # Final response with completion flag
             yield {

@@ -2,6 +2,16 @@ __module_name__ = "main"
 
 import os
 import sys
+import warnings
+
+# Setup environment to suppress warnings before any other imports
+os.environ["TORCH_WARN"] = "0"
+os.environ["PYTORCH_DISABLE_TORCH_FUNCTION_WARN"] = "1"
+os.environ["TOKENIZERS_PARALLELISM"] = "false"
+warnings.filterwarnings("ignore", category=DeprecationWarning)
+warnings.filterwarnings("ignore", category=FutureWarning)
+warnings.filterwarnings("ignore", category=UserWarning, module="torch")
+
 project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, project_root)
 import streamlit as st
