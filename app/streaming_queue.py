@@ -9,6 +9,7 @@ controlled UI animations.
 import threading
 import queue
 import time
+import re
 from typing import Dict, Any, Optional, Iterator, Callable
 from dataclasses import dataclass
 from enum import Enum
@@ -17,6 +18,121 @@ class StreamingMode(Enum):
     CHARACTER = "character"
     WORD = "word"
     INSTANT = "instant"
+
+class LaTeXBuffer:
+    """
+    Smart buffer for LaTeX mathematical expressions during streaming.
+    Prevents partial LaTeX from being rendered during character-by-character streaming.
+    """
+    
+    def __init__(self):
+        self.buffer = ""
+        self.in_block_math = False
+        self.in_inline_math = False
+        self.block_math_pattern = re.compile(r'\$\$.*?\$\$', re.DOTALL)
+        self.inline_math_pattern = re.compile(r'\$[^$]+\$')
+        
+    def add_character(self, char: str) -> tuple[str, bool]:
+        """
+        Add a character to the buffer and return (text_to_display, should_display)
+        
+        Returns:
+            tuple: (text_to_display, should_display_now)
+        """
+        self.buffer += char
+        
+        # Check for block math delimiters
+        if char == '$':
+            if self.buffer.endswith('$$'):
+                if not self.in_block_math:
+                    # Starting block math
+                    self.in_block_math = True
+                    return "", False  # Don't display yet
+                else:
+                    # Ending block math
+                    self.in_block_math = False
+                    # Return the complete block math expression
+                    result = self.buffer
+                    self.buffer = ""
+                    return result, True
+            elif not self.in_block_math:
+                if not self.in_inline_math:
+                    # Starting inline math
+                    self.in_inline_math = True
+                    return "", False  # Don't display yet
+                else:
+                    # Ending inline math
+                    self.in_inline_math = False
+                    # Return the complete inline math expression
+                    result = self.buffer
+                    self.buffer = ""
+                    return result, True
+        
+        # If we're inside math, buffer everything
+        if self.in_block_math or self.in_inline_math:
+            return "", False
+        
+        # Not in math, return the character immediately
+        result = self.buffer
+        self.buffer = ""
+        return result, True
+    
+    def add_text(self, text: str) -> str:
+        """
+        Add text and return what should be displayed immediately.
+        For word-by-word streaming, we process complete words.
+        """
+        self.buffer += text
+        
+        # Check if we have complete math expressions
+        display_text = ""
+        remaining_text = self.buffer
+        
+        # Process block math first
+        while True:
+            match = self.block_math_pattern.search(remaining_text)
+            if not match:
+                break
+            
+            # Add text before the math
+            display_text += remaining_text[:match.start()]
+            # Add the complete math expression
+            display_text += match.group()
+            # Continue with remaining text
+            remaining_text = remaining_text[match.end():]
+        
+        # Process inline math
+        while True:
+            match = self.inline_math_pattern.search(remaining_text)
+            if not match:
+                break
+                
+            # Add text before the math
+            display_text += remaining_text[:match.start()]
+            # Add the complete math expression
+            display_text += match.group()
+            # Continue with remaining text
+            remaining_text = remaining_text[match.end():]
+        
+        # Check if remaining text contains partial math
+        has_partial_block = '$$' in remaining_text and remaining_text.count('$$') % 2 == 1
+        has_partial_inline = '$' in remaining_text and not has_partial_block and remaining_text.count('$') % 2 == 1
+        
+        if has_partial_block or has_partial_inline:
+            # Keep partial math in buffer
+            self.buffer = remaining_text
+        else:
+            # No partial math, display everything
+            display_text += remaining_text
+            self.buffer = ""
+            
+        return display_text
+    
+    def flush(self) -> str:
+        """Return any remaining buffered content"""
+        result = self.buffer
+        self.buffer = ""
+        return result
 
 @dataclass
 class StreamingConfig:
@@ -89,6 +205,7 @@ class StreamlitStreamingManager:
         # Consumer logic (runs in main thread)
         accumulated_text = ""
         display_text = ""
+        latex_buffer = LaTeXBuffer()
         start_time = time.time()
         max_total_time = 300.0  # 5 minutes maximum total time
         
@@ -115,36 +232,45 @@ class StreamlitStreamingManager:
                                 unsafe_allow_html=True
                             )
                         elif mode == StreamingMode.CHARACTER:
-                            # Character mode - animate each character
+                            # Character mode - animate each character with LaTeX awareness
                             for char in chunk_text:
-                                display_text += char
-                                message_placeholder.markdown(
-                                    display_text + f"<img src='data:image/png;base64,{quill_icon}' style='width: 40px; height: 40px; display: inline; vertical-align: bottom; transform: translateY(-5px);'>",
-                                    unsafe_allow_html=True
-                                )
-                                if streaming_delay > 0:
-                                    time.sleep(streaming_delay)
+                                char_to_display, should_display = latex_buffer.add_character(char)
+                                if should_display and char_to_display:
+                                    display_text += char_to_display
+                                    message_placeholder.markdown(
+                                        display_text + f"<img src='data:image/png;base64,{quill_icon}' style='width: 40px; height: 40px; display: inline; vertical-align: bottom; transform: translateY(-5px);'>",
+                                        unsafe_allow_html=True
+                                    )
+                                    if streaming_delay > 0:
+                                        time.sleep(streaming_delay)
                         elif mode == StreamingMode.WORD:
-                            # Word mode - animate each word
-                            words = chunk_text.split()
-                            for i, word in enumerate(words):
-                                if display_text and not display_text.endswith(" "):
-                                    display_text += " " + word
-                                else:
-                                    display_text += word
-                                    
-                                message_placeholder.markdown(
-                                    display_text + f"<img src='data:image/png;base64,{quill_icon}' style='width: 40px; height: 40px; display: inline; vertical-align: bottom; transform: translateY(-5px);'>",
-                                    unsafe_allow_html=True
-                                )
-                                if i < len(words) - 1 and streaming_delay > 0:
-                                    time.sleep(streaming_delay)
+                            # Word mode - animate each word with LaTeX awareness
+                            words_to_display = latex_buffer.add_text(chunk_text)
+                            if words_to_display:
+                                words = words_to_display.split()
+                                for i, word in enumerate(words):
+                                    if display_text and not display_text.endswith(" "):
+                                        display_text += " " + word
+                                    else:
+                                        display_text += word
+                                        
+                                    message_placeholder.markdown(
+                                        display_text + f"<img src='data:image/png;base64,{quill_icon}' style='width: 40px; height: 40px; display: inline; vertical-align: bottom; transform: translateY(-5px);'>",
+                                        unsafe_allow_html=True
+                                    )
+                                    if i < len(words) - 1 and streaming_delay > 0:
+                                        time.sleep(streaming_delay)
                 
                 except queue.Empty:
                     continue
                 except Exception as e:
                     producer_error[0] = e
                     break
+            
+            # Flush any remaining LaTeX content
+            remaining_latex = latex_buffer.flush()
+            if remaining_latex:
+                display_text += remaining_latex
             
             # Wait for producer to finish
             producer_thread.join(timeout=2.0)
