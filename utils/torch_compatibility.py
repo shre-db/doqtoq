@@ -61,8 +61,6 @@ def apply_streamlit_fixes():
     warnings.filterwarnings("ignore", message=".*no running event loop.*")
     
     print("Applied PyTorch compatibility fixes for Streamlit")
-    
-    print("Applied PyTorch compatibility fixes for Streamlit")
 
 
 if __name__ == "__main__":

@@ -1,6 +1,6 @@
 __module_name__ = "rag_engine"
 
-from langchain_community.chat_message_histories import ChatMessageHistory
+from langchain_core.chat_history import InMemoryChatMessageHistory
 from langchain_core.messages import HumanMessage, AIMessage, SystemMessage
 from langchain_core.runnables.history import RunnableWithMessageHistory
 
@@ -46,7 +46,7 @@ class DocumentRAG:
         self.retriever = None
         self.llm = None
         self.chain = None
-        self.chat_history = ChatMessageHistory()
+        self.chat_history = InMemoryChatMessageHistory()
         self._initialize_pipeline()
     
     def _initialize_pipeline(self):
@@ -183,8 +183,6 @@ class DocumentRAG:
         prompt_template = load_prompt_template()
         format_docs = lambda docs: "\n\n".join(doc.page_content for doc in docs)
 
-        format_chat_history = lambda history: format_chat_history(history)
-
         # Helper function to safely get similarity metrics
         def safe_get_similarity_metrics(question, metric_key):
             try:
@@ -197,7 +195,7 @@ class DocumentRAG:
         # Helper function to safely get chat history
         def safe_get_chat_history(x):
             try:
-                return format_chat_history(self.chat_history.messages)
+                return self.format_chat_history(self.chat_history.messages)
             except Exception as e:
                 print(f"Error getting chat history: {e}")
                 return ""

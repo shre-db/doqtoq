@@ -4,7 +4,7 @@ import streamlit as st
 import os
 import time
 from streamlit_chat import message
-from utils import load_svg_icon, load_png_icon
+from app.utils import load_svg_icon, load_png_icon
 from app.streaming_queue import handle_streamed_response
 
 def get_default_avatar():
