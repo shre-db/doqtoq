@@ -1,3 +1,5 @@
+__module_name__ = "utils"
+
 def load_svg_icon(icon_path):
     """Load and return SVG icon as base64 encoded string"""
     try:

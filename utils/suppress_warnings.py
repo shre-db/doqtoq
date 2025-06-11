@@ -1,3 +1,5 @@
+__module_name__ = "suppress_warnings"
+
 """
 Utility script to suppress common warnings and setup environment variables
 for running the DoqToq application.

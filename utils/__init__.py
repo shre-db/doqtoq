@@ -1,3 +1,5 @@
+__module_name__ = "utils"
+
 """
 Utility modules for DoqToq application.
 

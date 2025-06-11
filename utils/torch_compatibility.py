@@ -1,3 +1,5 @@
+__module_name__ = "torch_compatibility"
+
 """
 PyTorch compatibility fix for Streamlit file watcher issues.
 

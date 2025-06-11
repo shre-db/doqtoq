@@ -1,3 +1,5 @@
+__module_name__ = "streaming_queue"
+
 """
 Streaming Queue Implementation for DoqToq
 

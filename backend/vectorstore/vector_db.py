@@ -1,6 +1,5 @@
 __module_name__ = "vector_db"
 
-
 from langchain_chroma import Chroma
 from langchain.embeddings.base import Embeddings
 import os

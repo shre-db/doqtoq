@@ -1,3 +1,5 @@
+__module_name__ = "streaming_queue_multithreaded"
+
 import threading
 import queue
 import time
