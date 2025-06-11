@@ -35,7 +35,7 @@ from app.config import init_session_state
 from app.sidebar import render_sidebar
 from app.styles import inject_custom_css
 from backend.rag_engine import DocumentRAG
-from utils import load_svg_icon
+from app.utils import load_svg_icon
 
 inject_custom_css()
 render_sidebar()
