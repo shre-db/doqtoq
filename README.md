@@ -14,7 +14,7 @@
 
 ## What is DoqToq?
 
-DoqToq is an advanced **Retrieval-Augmented Generation (RAG)** system that makes your documents speak in first person with personality. Upload any document, and it becomes a knowledgeable conversational partner that can answer questions about its own content with intelligence and character.
+DoqToq is an **expressive Retrieval-Augmented Generation (RAG) system** that transforms documents into engaging conversational partners. Upload any document, and it becomes a knowledgeable entity that discusses its own content with personality, intelligence, and first-person perspective.
 
 ### Key Features
 
