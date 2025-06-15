@@ -55,6 +55,7 @@ vectorstore/index/
 
 # Python files
 test_streaming_performance.py
+PRODUCTION_READINESS.md
 
 # Vectorstore files
 vectorstore/*.json

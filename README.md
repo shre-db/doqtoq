@@ -127,7 +127,7 @@ graph TD
 ## Features Deep Dive
 
 ### Document Personality
-Your documents don't just answer questions—they embody their content. DoqToq uses carefully crafted prompts to give documents a distinctive voice and perspective.
+Your documents don't just answer questions, they embody their content. DoqToq uses carefully crafted prompts to give documents a distinctive voice and perspective.
 
 ### Smart Relevance Scoring
 Advanced similarity metrics help you understand how well the AI matched your question to document content:
@@ -214,7 +214,7 @@ doqtoq/
 ├── Dockerfile.conda                           # Container deployment configuration for conda environment
 ├── .env.example                               # Environment variables template
 ├── .gitignore                                 # Git ignore patterns
-├── LICENSE.md                                 # MIT license terms
+├── LICENSE.md                                 # Apache 2.0 license terms
 ├── .vscode/                                   # VS Code workspace settings
 ├── .streamlit/                                # Streamlit configuration
 └── .dockerignore                              # Docker build ignore patterns

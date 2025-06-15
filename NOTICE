@@ -1,0 +1,35 @@
+DoqToq - Documents that talk
+Copyright 2024-2025 Shreyas Bangera
+
+This product includes software developed by Shreyas Bangera and contributors.
+
+This software contains components from the following third-party projects:
+
+1. LangChain (MIT License)
+   Copyright (c) LangChain, Inc.
+   https://github.com/langchain-ai/langchain
+
+2. Streamlit (Apache License 2.0)
+   Copyright 2018-2024 Snowflake Inc.
+   https://github.com/streamlit/streamlit
+
+3. ChromaDB (Apache License 2.0)
+   Copyright 2022-2024 Chroma
+   https://github.com/chroma-core/chroma
+
+4. HuggingFace Transformers (Apache License 2.0)
+   Copyright 2018 The HuggingFace Inc. team
+   https://github.com/huggingface/transformers
+
+5. PyPDF2 (BSD License)
+   Copyright (c) 2006-2008, Mathieu Fenniak
+   https://github.com/py-pdf/PyPDF2
+
+6. Python-dotenv (BSD License)
+   Copyright (c) 2014, Saurabh Kumar
+   https://github.com/theskumar/python-dotenv
+
+The DoqToq logo and branding assets are proprietary to Shreyas Bangera.
+
+For questions about licensing or commercial use, please contact:
+GitHub: https://github.com/shre-db/doqtoq
