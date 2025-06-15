@@ -2,6 +2,7 @@
 
 **Documents that talk — DoqToq**
 
+**/ˈdɒk.tɒk/**
 > Transform your documents into intelligent conversational partners. DoqToq brings your PDFs, text files, and documents to life with AI-powered personality and deep understanding.
 
 [![Streamlit](https://img.shields.io/badge/Built%20with-Streamlit-red?style=flat-square&logo=streamlit)](https://streamlit.io)
