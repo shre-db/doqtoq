@@ -579,6 +579,12 @@ DoqToq follows semantic versioning and maintains a detailed changelog. Each rele
 ### Community Requests
 Vote on features and track progress in our [GitHub Discussions](https://github.com/shre-db/doqtoq/discussions)!
 
+### Future Vision
+Interested in what's next for DoqToq? Check out our comprehensive [Future Roadmap](docs/FUTURE_ROADMAP.md) which outlines our plans for:
+- **Advanced RAG Enhancement**: GraphRAG, hybrid search, and intelligent synthesis
+- **DoqToq Groups**: Revolutionary multi-document collaboration where documents interact with each other
+- **Research Opportunities**: Academic and industry collaboration possibilities
+
 ## License
 
 DoqToq is released under the Apache 2.0 License. See [LICENSE.md](LICENSE.md) for details.
