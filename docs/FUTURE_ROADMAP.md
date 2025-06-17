@@ -146,6 +146,7 @@ class GraphEnhancedDocumentRAG(DocumentRAG):
 ---
 
 ## Phase 3: DoqToq Groups - Multi-Document Collaboration
+![DoqToq Groups Cover](../assets/doqtoq_groups_cover.png)
 
 ### Revolutionary Vision
 
