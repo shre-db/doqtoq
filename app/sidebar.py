@@ -153,11 +153,11 @@ def render_sidebar():
             local_status = ':material/check_circle:' if model_info['local'] else ':material/cancel:'
             st.sidebar.info(f"Local", icon=local_status)
             if model_info.get('requires_api_key'):
-                st.sidebar.warning("⚠️ Requires API key")
+                st.sidebar.warning("Requires API key", icon=":material/warning:")
             if model_info.get('gpu_recommended'):
-                st.sidebar.info("💻 GPU recommended for best performance")
+                st.sidebar.info("GPU recommended for best performance", icon=":material/memory:")
             if model_info.get('multilingual'):
-                st.sidebar.info("🌍 Supports multiple languages")
+                st.sidebar.info("Supports multiple languages", icon=":material/translate:")
         else:
             st.sidebar.error(model_info['error'])
 

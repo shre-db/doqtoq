@@ -11,15 +11,22 @@ load_dotenv()
 EmbeddingProvider = Literal["huggingface", "mistral"]
 
 # Predefined model configurations for different providers
+# Model Providers and Organizations:
+# - sentence-transformers: all-MiniLM-L6-v2, all-mpnet-base-v2
+# - BAAI (Beijing Academy of Artificial Intelligence): bge-small-en-v1.5, bge-base-en-v1.5, bge-large-en-v1.5
+# - mistralai: mistral-embed
 EMBEDDING_MODELS = {
     "huggingface": {
+        # Sentence Transformers models
         "all-MiniLM-L6-v2": "sentence-transformers/all-MiniLM-L6-v2",
         "all-mpnet-base-v2": "sentence-transformers/all-mpnet-base-v2",
+        # BAAI (Beijing Academy of Artificial Intelligence) models
         "bge-small-en-v1.5": "BAAI/bge-small-en-v1.5",
         "bge-base-en-v1.5": "BAAI/bge-base-en-v1.5",
         "bge-large-en-v1.5": "BAAI/bge-large-en-v1.5"
     },
     "mistral": {
+        # Mistral AI models
         "mistral-embed": "mistral-embed"
     }
 }
@@ -156,19 +163,99 @@ def get_model_info(provider: EmbeddingProvider, model_name: str) -> Dict[str, An
     
     # Add provider-specific information
     if provider == "huggingface":
-        info.update({
-            "type": "BGE (Beijing Academy of AI)",
-            "local": True,
-            "gpu_recommended": "bge-large" in model_name
-        })
+        # Determine the actual model creator/organization
+        if model_name.startswith("bge-"):
+            info.update({
+                "type": "BGE (Beijing Academy of Artificial Intelligence - BAAI)",
+                "organization": "BAAI",
+                "local": True,
+                "gpu_recommended": "bge-large" in model_name,
+                "description": "BGE (Beijing Academy of Artificial Intelligence) embedding model"
+            })
+        elif model_name in ["all-MiniLM-L6-v2", "all-mpnet-base-v2"]:
+            info.update({
+                "type": "Sentence Transformers",
+                "organization": "sentence-transformers",
+                "local": True,
+                "gpu_recommended": "mpnet" in model_name,
+                "description": "Sentence Transformers embedding model"
+            })
+        else:
+            info.update({
+                "type": "HuggingFace",
+                "organization": "huggingface",
+                "local": True,
+                "gpu_recommended": False
+            })
     elif provider == "mistral":
         info.update({
             "type": "Mistral AI",
+            "organization": "mistralai",
             "local": False,
-            "api_based": True
+            "api_based": True,
+            "description": "Mistral AI embedding model"
         })
     
     return info
+
+def get_models_by_organization() -> Dict[str, Dict[str, List[str]]]:
+    """
+    Get embedding models organized by their actual organizations/providers.
+    
+    Returns:
+        Dictionary organized by provider -> organization -> list of models
+    """
+    models_by_org = {
+        "huggingface": {
+            "sentence-transformers": [
+                "all-MiniLM-L6-v2",
+                "all-mpnet-base-v2"
+            ],
+            "BAAI": [
+                "bge-small-en-v1.5",
+                "bge-base-en-v1.5", 
+                "bge-large-en-v1.5"
+            ]
+        },
+        "mistral": {
+            "mistralai": [
+                "mistral-embed"
+            ]
+        }
+    }
+    return models_by_org
+
+def list_models_with_providers() -> Dict[str, Any]:
+    """
+    List all available models with detailed provider information.
+    
+    Returns:
+        Dictionary with detailed model and provider information
+    """
+    result = {
+        "summary": {
+            "total_models": 0,
+            "providers": list(EMBEDDING_MODELS.keys()),
+            "organizations": []
+        },
+        "models_by_provider": {},
+        "models_by_organization": get_models_by_organization()
+    }
+    
+    # Count total models and get organizations
+    organizations = set()
+    for provider, models in EMBEDDING_MODELS.items():
+        result["models_by_provider"][provider] = {}
+        result["summary"]["total_models"] += len(models)
+        
+        for model_name in models.keys():
+            model_info = get_model_info(provider, model_name)
+            result["models_by_provider"][provider][model_name] = model_info
+            if "organization" in model_info:
+                organizations.add(model_info["organization"])
+    
+    result["summary"]["organizations"] = list(organizations)
+    return result
 
 # Backward compatibility
 def get_embedding_model_legacy(model_name: str = "sentence-transformers/all-MiniLM-L6-v2"):
