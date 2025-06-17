@@ -249,11 +249,14 @@ doqtoq/
 ├── assets/                                    # Visual Resources and Branding
 │   ├── DoqToq-logo.svg                        # Main application logo
 │   ├── scroll-light.svg                       # Document avatar icon
+│   ├── scroll-duotone.svg                     # Alternative document icon
 │   ├── user-light.svg                         # User avatar icon
+│   ├── user-fill.svg                          # Alternative user avatar icon
 │   ├── faders-horizontal-fill.svg             # Settings icon
 │   ├── sparkle-light.svg                      # AI magic indicator
 │   ├── gear-light.svg                         # Configuration icon
-│   └── quill.png                              # Writing/streaming indicator
+│   ├── quill.png                              # Writing/streaming indicator
+│   └── read-cv-logo.svg                       # Additional branding asset
 │
 ├── data/                                      # Document Storage and Processing
 │   ├── uploads/                               # Temporary uploaded file storage
@@ -266,7 +269,9 @@ doqtoq/
 │
 ├── docs/                                      # Documentation
 │   ├── API.md                                 # API reference documentation
-│   └── DEPLOYMENT.md                          # Deployment guide
+│   ├── DEPLOYMENT.md                          # Deployment guide
+│   ├── FUTURE_ROADMAP.md                      # Future development roadmap
+│   └── README.md                              # Documentation overview
 │
 ├── utils/                                     # System Utilities
 │   ├── suppress_warnings.py                   # Warning suppression for clean output
@@ -288,6 +293,7 @@ doqtoq/
 ├── requirements-dev.txt                       # Development dependencies
 ├── pyproject.toml                             # Project configuration and testing
 ├── setup.py                                   # Package distribution setup
+├── MANIFEST.in                                # Package manifest for distribution
 ├── Makefile                                   # Development automation
 ├── install.sh                                 # Automated installation script
 ├── start_app.sh                               # Application startup script
@@ -299,6 +305,7 @@ doqtoq/
 ├── SECURITY.md                                # Security policy
 ├── CHANGELOG.md                               # Version history
 ├── PRODUCTION_READINESS.md                    # Production checklist
+├── NOTICE                                     # Legal notices and attributions
 ├── .env.example                               # Environment variables template
 ├── .gitignore                                 # Git ignore patterns
 ├── LICENSE.md                                 # Apache 2.0 license terms
@@ -533,6 +540,7 @@ docker-compose restart
 ### Documentation
 - **[API Reference](docs/API.md)**: Complete API documentation
 - **[Deployment Guide](docs/DEPLOYMENT.md)**: Comprehensive deployment instructions  
+- **[Future Roadmap](docs/FUTURE_ROADMAP.md)**: Planned features and development roadmap
 - **[Contributing Guidelines](CONTRIBUTING.md)**: How to contribute to DoqToq
 - **[Security Policy](SECURITY.md)**: Security guidelines and vulnerability reporting
 - **[Changelog](CHANGELOG.md)**: Version history and updates
@@ -580,10 +588,11 @@ DoqToq follows semantic versioning and maintains a detailed changelog. Each rele
 Vote on features and track progress in our [GitHub Discussions](https://github.com/shre-db/doqtoq/discussions)!
 
 ### Future Vision
-Interested in what's next for DoqToq? Check out our comprehensive [Future Roadmap](docs/FUTURE_ROADMAP.md) which outlines our plans for:
-- **Advanced RAG Enhancement**: GraphRAG, hybrid search, and intelligent synthesis
+Interested in what's next for DoqToq? Check out our comprehensive [Future Roadmap](docs/FUTURE_ROADMAP.md) which outlines our ambitious plans for:
+- **Advanced RAG Enhancement**: GraphRAG, hybrid search, intelligent synthesis, and sophisticated retrieval techniques
 - **DoqToq Groups**: Revolutionary multi-document collaboration where documents interact with each other
-- **Research Opportunities**: Academic and industry collaboration possibilities
+- **Knowledge Synthesis**: Cross-document reasoning and emergent knowledge discovery
+- **Academic & Industry Integration**: Research opportunities and commercial applications
 
 ## License
 
@@ -606,3 +615,6 @@ DoqToq is built with love using:
 **Made with ❤️ for everyone.**
 
 *Transform your documents into intelligent conversational partners today with DoqToq!*
+
+---
+*Last updated: June 18, 2025* 
