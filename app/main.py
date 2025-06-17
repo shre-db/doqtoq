@@ -106,7 +106,7 @@ if uploaded_file:
             )
             # Get model provider from sidebar
             llm_choice = st.session_state.get("llm_choice", "Gemini (Google)")
-            model_provider = "google" if llm_choice == "Gemini (Google)" else "mistral" if llm_choice == "Mistral" else "ollama"
+            model_provider = "google" if llm_choice == "Gemini (Google)" else "mistral" if llm_choice == "Mistral AI" else "ollama"
             logger.info(
                 f"{__module_name__} - Using model provider: {model_provider} (from choice: {llm_choice})"
             )
@@ -136,7 +136,7 @@ if uploaded_file:
     # Update settings if they've changed
     if st.session_state.qa_chain:
         llm_choice = st.session_state.get("llm_choice", "Gemini (Google)")
-        model_provider = "google" if llm_choice == "Gemini (Google)" else "mistral" if llm_choice == "Mistral" else "ollama"
+        model_provider = "google" if llm_choice == "Gemini (Google)" else "mistral" if llm_choice == "Mistral AI" else "ollama"
         
         # Get current settings
         temperature = st.session_state.get("temperature", 0.7)
