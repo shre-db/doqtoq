@@ -1,6 +1,6 @@
 # DoqToq Future Roadmap: Advanced RAG & Multi-Document Collaboration
 
-*Last Updated: June 17, 2025*
+*Last Updated: June 18, 2025*
 
 ## Executive Summary
 
@@ -8,21 +8,21 @@ DoqToq is positioned to evolve from an "expressive RAG system" to a groundbreaki
 
 ## Current State Assessment
 
-### DoqToq's Strengths 🎯
+### DoqToq's Strengths
 - **Innovative Document Personality**: First-person document interaction
 - **Production-Ready Infrastructure**: Comprehensive testing, CI/CD, Docker support
 - **Multi-LLM Support**: Flexible integration with Google Gemini, Mistral AI, and Ollama
 - **Expressive User Experience**: Real-time streaming, emoji support, personality-driven responses
 - **Solid RAG Foundation**: Well-implemented retrieval-augmented generation pipeline
 
-### Areas for Enhancement 📈
+### Areas for Enhancement
 DoqToq currently uses **standard RAG techniques** while excelling in user experience. To claim "advanced RAG" status, we need to enhance the core retrieval and reasoning capabilities.
 
 ---
 
 ## Phase 1: Advanced RAG Enhancement
 
-### 🔍 Sophisticated Retrieval Techniques
+### Sophisticated Retrieval Techniques
 
 #### Hybrid Search & Multi-Modal Retrieval
 - **Hybrid semantic + keyword search**: Combine dense embeddings with sparse BM25
@@ -36,7 +36,7 @@ DoqToq currently uses **standard RAG techniques** while excelling in user experi
 - **User preference learning**: Adapt retrieval based on interaction patterns
 - **Dynamic chunk sizing**: Adjust boundaries based on document structure
 
-### 📊 Intelligent Document Processing
+### Intelligent Document Processing
 
 #### Advanced Chunking Strategies
 - **Semantic chunking**: Use sentence embeddings to group related content
@@ -50,7 +50,7 @@ DoqToq currently uses **standard RAG techniques** while excelling in user experi
 - **Table and figure extraction**: Special handling for structured data
 - **Citation and reference mapping**: Track relationships between document sections
 
-### 🧠 Intelligent Context Management
+### Intelligent Context Management
 
 #### Multi-Turn Conversation Enhancement
 - **Intent tracking**: Understand follow-up questions vs. new topics
@@ -64,7 +64,7 @@ DoqToq currently uses **standard RAG techniques** while excelling in user experi
 - **Query pattern recognition**: Learn common question types for documents
 - **Feedback learning**: Improve responses based on user reactions
 
-### 🔄 Advanced RAG Orchestration
+### Advanced RAG Orchestration
 
 #### Multi-Step Reasoning
 - **Chain-of-thought retrieval**: Break complex questions into sub-questions
@@ -82,7 +82,7 @@ DoqToq currently uses **standard RAG techniques** while excelling in user experi
 
 ## Phase 2: GraphRAG Integration
 
-### 🌐 Why GraphRAG for DoqToq?
+### Why GraphRAG for DoqToq?
 
 DoqToq's document personality feature would become exponentially more sophisticated with graph-based understanding of document structure and relationships.
 
@@ -104,7 +104,7 @@ and culminating in practical applications in my final chapter. Let me trace
 this journey for you..."
 ```
 
-### 🔧 GraphRAG Implementation Strategy
+### GraphRAG Implementation Strategy
 
 #### Phase 2.1: Entity & Relationship Extraction
 1. **Extract entities** from each chunk (people, concepts, dates, locations)
@@ -147,11 +147,11 @@ class GraphEnhancedDocumentRAG(DocumentRAG):
 
 ## Phase 3: DoqToq Groups - Multi-Document Collaboration
 
-### 🚀 Revolutionary Vision
+### Revolutionary Vision
 
 Transform DoqToq from a document conversation tool into a **multi-document knowledge synthesis platform** where documents become collaborative entities that can interact with users and each other.
 
-### 🎭 Core Concept: Documents as Collaborative Agents
+### Core Concept: Documents as Collaborative Agents
 
 #### Multi-Document Chat Orchestration
 ```
@@ -178,7 +178,7 @@ assessment based on your findings..."
 User: "Can you two find a middle ground?"
 ```
 
-### 🏗️ DoqToq Groups Architecture
+### DoqToq Groups Architecture
 
 #### Multi-Agent RAG System
 ```python
@@ -212,7 +212,7 @@ class DocumentAgent(GraphEnhancedDocumentRAG):
         pass
 ```
 
-### 🎯 Advanced Group Features
+### Advanced Group Features
 
 #### Document Roles & Personalities
 - **Primary Source**: "I'm the authoritative voice on this topic"
@@ -232,7 +232,7 @@ class DocumentAgent(GraphEnhancedDocumentRAG):
 - **Conflict resolution**: Identify and address contradictory information
 - **Dynamic relationships**: Documents form alliances and expertise hierarchies
 
-### 🌟 Revolutionary Capabilities
+### Revolutionary Capabilities
 
 #### Synthesis & Insight Generation
 - **Collaborative summaries**: Documents work together for comprehensive overviews
@@ -250,7 +250,7 @@ class DocumentAgent(GraphEnhancedDocumentRAG):
 
 ## Implementation Roadmap
 
-### 🏃‍♂️ Short Term (6-8 months)
+### Short Term (6-8 months)
 **Advanced RAG Foundation**
 - [ ] Implement hybrid search (semantic + keyword)
 - [ ] Add multi-query generation
@@ -258,7 +258,7 @@ class DocumentAgent(GraphEnhancedDocumentRAG):
 - [ ] Create conversation-aware retrieval
 - [ ] Build answer confidence scoring
 
-### 🚶‍♂️ Medium Term (8-12 months)
+### Medium Term (8-12 months)
 **GraphRAG Integration**
 - [ ] Entity and relationship extraction system
 - [ ] Document graph construction pipeline
@@ -266,7 +266,7 @@ class DocumentAgent(GraphEnhancedDocumentRAG):
 - [ ] Cross-reference capability development
 - [ ] Structural awareness in responses
 
-### 🏔️ Long Term (12-18 months)
+### Long Term (12-18 months)
 **DoqToq Groups MVP**
 - [ ] Multi-document loading and management
 - [ ] Basic group chat interface
@@ -274,7 +274,7 @@ class DocumentAgent(GraphEnhancedDocumentRAG):
 - [ ] Simple conversation orchestration
 - [ ] Cross-document search capabilities
 
-### 🚀 Future Horizons (18+ months)
+### Future Horizons (18+ months)
 **Advanced Group Intelligence**
 - [ ] Sophisticated group personality development
 - [ ] Dynamic relationship learning
@@ -286,7 +286,7 @@ class DocumentAgent(GraphEnhancedDocumentRAG):
 
 ## Technical Challenges & Solutions
 
-### 🎯 Priority Technical Challenges
+### Priority Technical Challenges
 
 #### 1. Computational Complexity
 **Challenge**: Graph construction and multi-document processing overhead
@@ -320,7 +320,7 @@ class DocumentAgent(GraphEnhancedDocumentRAG):
 - Validation against source documents
 - Iterative refinement based on user feedback
 
-### 🛠️ Implementation Strategies
+### Implementation Strategies
 
 #### Gradual Feature Rollout
 1. **Add graph construction** as optional feature
@@ -339,7 +339,7 @@ class DocumentAgent(GraphEnhancedDocumentRAG):
 
 ## Research & Development Opportunities
 
-### 🔬 Academic Research Areas
+### Academic Research Areas
 
 #### 1. Multi-Document RAG Systems
 - **Research Question**: How can multiple documents effectively collaborate in knowledge synthesis?
@@ -361,7 +361,7 @@ class DocumentAgent(GraphEnhancedDocumentRAG):
 - **Potential Impact**: Automated knowledge discovery and synthesis
 - **Applications**: Scientific research, policy analysis, educational content creation
 
-### 🏭 Industry Applications
+### Industry Applications
 
 #### Enterprise Knowledge Management
 - **Internal document collaboration** for large organizations
@@ -385,7 +385,7 @@ class DocumentAgent(GraphEnhancedDocumentRAG):
 
 ## Call to Action for Contributors
 
-### 🎯 Immediate Contribution Opportunities
+### Immediate Contribution Opportunities
 
 #### For Researchers
 - **Evaluate advanced RAG techniques** and their applicability to DoqToq
@@ -411,7 +411,7 @@ class DocumentAgent(GraphEnhancedDocumentRAG):
 - **Contribute domain knowledge** for improving document understanding
 - **Validate synthesis quality** in specialized fields
 
-### 🤝 How to Get Involved
+### How to Get Involved
 
 1. **Join the Discussion**: Participate in GitHub Discussions and Issues
 2. **Contribute Code**: Submit pull requests for features and improvements
@@ -419,7 +419,7 @@ class DocumentAgent(GraphEnhancedDocumentRAG):
 4. **Provide Feedback**: Test new features and report experiences
 5. **Spread the Word**: Share DoqToq with relevant communities and researchers
 
-### 📞 Contact & Collaboration
+### Contact & Collaboration
 
 - **GitHub Repository**: [github.com/shre-db/doqtoq](https://github.com/shre-db/doqtoq)
 - **Discussions**: GitHub Discussions for feature requests and brainstorming

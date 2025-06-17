@@ -1,5 +1,7 @@
 # ![DoqToq Logo](./assets/DoqToq-logo.svg) DoqToq
 
+![DoqToq Cover Image](./assets/doqtoq_cover_photo.png)
+
 **Documents that talk — DoqToq**
 
 **/ˈdɒk.tɒk/**
@@ -246,7 +248,8 @@ doqtoq/
 │       ├── vector_db.py                       # ChromaDB integration and operations
 │       └── index/                             # Persistent vector storage
 │
-├── assets/                                    # Visual Resources and Branding
+├── assets/   
+│   ├── doqtoq_cover_photo.png                 # Banner image
 │   ├── DoqToq-logo.svg                        # Main application logo
 │   ├── scroll-light.svg                       # Document avatar icon
 │   ├── scroll-duotone.svg                     # Alternative document icon
