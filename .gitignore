@@ -63,3 +63,15 @@ vectorstore/*.json
 *.sqlite3
 *.bin
 vectorstore/index/*/
+
+# Python build artifacts
+*.egg-info/
+*.eggs/
+build/
+dist/
+*.pyc
+*.pyo
+*.pyd
+*.log
+*.coverage
+htmlcov/

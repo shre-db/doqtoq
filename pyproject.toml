@@ -1,3 +1,124 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "doqtoq"
+version = "1.0.0"
+description = "Transform your documents into intelligent conversational partners"
+readme = "README.md"
+license = {text = "Apache-2.0"}
+authors = [
+    {name = "Shreyas Bangera", email = "shreyasdb99@gmail.com"}
+]
+maintainers = [
+    {name = "Shreyas Bangera", email = "shreyasdb99@gmail.com"}
+]
+keywords = [
+    "ai",
+    "rag",
+    "retrieval-augmented-generation",
+    "document-qa",
+    "chatbot",
+    "nlp",
+    "langchain",
+    "streamlit",
+    "conversational-ai",
+    "document-analysis",
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Education",
+    "Intended Audience :: Science/Research",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: Text Processing :: Linguistic",
+    "License :: OSI Approved :: Apache Software License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Operating System :: OS Independent",
+    "Framework :: Streamlit",
+]
+requires-python = ">=3.10"
+dependencies = [
+    "langchain==0.3.25",
+    "langchain_chroma==0.2.4",
+    "langchain_core==0.3.65",
+    "langchain_google_genai==2.1.5",
+    "langchain_huggingface==0.3.0",
+    "langchain_mistralai==0.2.10",
+    "langchain_ollama==0.3.3",
+    "langchain_text_splitters==0.3.8",
+    "mistralai==1.8.2",
+    "ollama==0.5.1",
+    "PyPDF2==3.0.1",
+    "python-dotenv==1.1.0",
+    "streamlit==1.45.1",
+    "streamlit_chat==0.1.1",
+    "torch==2.7.1",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.4.0",
+    "pytest-cov>=4.1.0",
+    "pytest-mock>=3.11.0",
+    "pytest-asyncio>=0.21.0",
+    "black>=23.7.0",
+    "isort>=5.12.0",
+    "flake8>=6.0.0",
+    "mypy>=1.5.0",
+    "safety>=2.3.0",
+    "bandit>=1.7.5",
+    "memory-profiler>=0.61.0",
+    "pytest-benchmark>=4.0.0",
+    "sphinx>=7.1.0",
+    "sphinx-rtd-theme>=1.3.0",
+    "pre-commit>=3.3.0",
+]
+test = [
+    "pytest>=7.4.0",
+    "pytest-cov>=4.1.0",
+    "pytest-mock>=3.11.0",
+    "pytest-asyncio>=0.21.0",
+]
+docs = [
+    "sphinx>=7.1.0",
+    "sphinx-rtd-theme>=1.3.0",
+]
+security = [
+    "safety>=2.3.0",
+    "bandit>=1.7.5",
+]
+
+[project.urls]
+Homepage = "https://github.com/shre-db/doqtoq"
+Repository = "https://github.com/shre-db/doqtoq"
+Documentation = "https://github.com/shre-db/doqtoq/blob/main/README.md"
+"Bug Reports" = "https://github.com/shre-db/doqtoq/issues"
+Source = "https://github.com/shre-db/doqtoq"
+
+[project.scripts]
+doqtoq = "app.main:main"
+
+[tool.setuptools]
+zip-safe = false
+include-package-data = true
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["app*", "backend*", "utils*"]
+exclude = ["tests*", "docs*"]
+
+[tool.setuptools.package-data]
+"*" = ["*.md", "*.txt", "*.yaml", "*.yml"]
+"assets" = ["*.svg", "*.png"]
+"backend.prompts" = ["*.md"]
+
+# Testing Configuration
 [tool.pytest.ini_options]
 minversion = "6.0"
 addopts = [
@@ -26,3 +147,103 @@ filterwarnings = [
     "ignore::PendingDeprecationWarning",
     "ignore::UserWarning:torch.*",
 ]
+
+# Code Coverage Configuration
+[tool.coverage.run]
+source = ["backend", "app", "utils"]
+omit = [
+    "*/tests/*",
+    "*/test_*",
+    "*/__pycache__/*",
+    "*/venv/*",
+    "*/env/*",
+    "setup.py",
+]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "if self.debug:",
+    "if settings.DEBUG",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if 0:",
+    "if __name__ == .__main__.:",
+    "class .*\\(.*Protocol.*\\):",
+    "@(abc\\.)?abstractmethod",
+]
+show_missing = true
+skip_covered = false
+precision = 2
+
+# Code Formatting with Black
+[tool.black]
+line-length = 88
+target-version = ['py310', 'py311', 'py312']
+include = '\.pyi?$'
+extend-exclude = '''
+/(
+  # directories
+  \.eggs
+  | \.git
+  | \.hg
+  | \.mypy_cache
+  | \.tox
+  | \.venv
+  | _build
+  | buck-out
+  | build
+  | dist
+)/
+'''
+
+# Import Sorting with isort
+[tool.isort]
+profile = "black"
+multi_line_output = 3
+line_length = 88
+known_first_party = ["app", "backend", "utils"]
+known_third_party = ["streamlit", "langchain", "torch", "pytest"]
+sections = ["FUTURE", "STDLIB", "THIRDPARTY", "FIRSTPARTY", "LOCALFOLDER"]
+include_trailing_comma = true
+force_grid_wrap = 0
+use_parentheses = true
+ensure_newline_before_comments = true
+
+# Type Checking with MyPy
+[tool.mypy]
+python_version = "3.10"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+check_untyped_defs = true
+disallow_untyped_decorators = true
+no_implicit_optional = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+warn_no_return = true
+warn_unreachable = true
+strict_equality = true
+show_error_codes = true
+
+[[tool.mypy.overrides]]
+module = [
+    "streamlit.*",
+    "streamlit_chat.*",
+    "langchain.*",
+    "langchain_*",
+    "ollama.*",
+    "mistralai.*",
+    "PyPDF2.*",
+]
+ignore_missing_imports = true
+
+# Security Scanning with Bandit
+[tool.bandit]
+exclude_dirs = ["tests", "venv", "env", ".venv", ".env"]
+skips = ["B101", "B601"]  # Skip assert_used and shell_injection_possible for tests
+
+[tool.bandit.assert_used]
+skips = ["*_test.py", "test_*.py"]
