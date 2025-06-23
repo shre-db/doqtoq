@@ -60,7 +60,7 @@ class ChromaConfig(BaseModel):
 
 class VectorDBConfig(BaseModel):
     """Main configuration for vector database system."""
-    provider: VectorDBProvider = Field(default="chroma", description="Vector database provider")  # Changed default to chroma for Phase 1
+    provider: VectorDBProvider = Field(default="qdrant", description="Vector database provider")  # Changed default to qdrant
     qdrant: QdrantConfig = Field(default_factory=QdrantConfig, description="Qdrant configuration")
     chroma: ChromaConfig = Field(default_factory=ChromaConfig, description="Chroma configuration")
 
@@ -68,12 +68,7 @@ class VectorDBConfig(BaseModel):
     @classmethod
     def validate_config(cls, values):
         """Validate the overall configuration."""
-        if isinstance(values, dict):
-            provider = values.get('provider')
-            if provider == 'qdrant':
-                # In Phase 1, warn that Qdrant is not yet available
-                print("Warning: Qdrant provider selected but not yet implemented. Falling back to Chroma.")
-                values['provider'] = 'chroma'
+        # No longer need to warn about Qdrant - it's now available!
         return values
 
     model_config = {
@@ -104,10 +99,10 @@ def get_vector_db_config() -> VectorDBConfig:
         VectorDBConfig object with loaded configuration
     """
     # Get provider with validation
-    provider = os.getenv("VECTOR_DB_PROVIDER", "chroma").lower()
+    provider = os.getenv("VECTOR_DB_PROVIDER", "qdrant").lower()  # Default to qdrant
     if provider not in ["qdrant", "chroma"]:
-        print(f"Warning: Invalid VECTOR_DB_PROVIDER '{provider}'. Defaulting to 'chroma'")
-        provider = "chroma"
+        print(f"Warning: Invalid VECTOR_DB_PROVIDER '{provider}'. Defaulting to 'qdrant'")
+        provider = "qdrant"
     
     # Build configuration dictionary
     config_data = {

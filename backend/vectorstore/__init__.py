@@ -19,6 +19,8 @@ from .factory import (
     get_available_providers
 )
 from .chroma_db import ChromaVectorDB
+from .qdrant_db import QdrantVectorDB
+from .migrations import VectorDBMigrator, migrate_to_qdrant, migrate_to_chroma
 
 # Backward compatibility - maintain the original API
 from .vector_db import (
@@ -41,6 +43,12 @@ __all__ = [
     "get_vector_database",
     "get_available_providers",
     "ChromaVectorDB",
+    "QdrantVectorDB",
+    
+    # Migration tools
+    "VectorDBMigrator",
+    "migrate_to_qdrant", 
+    "migrate_to_chroma",
     
     # Backward compatibility API
     "get_vectorstore",

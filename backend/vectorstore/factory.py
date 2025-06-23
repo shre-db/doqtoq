@@ -9,6 +9,7 @@ from langchain.embeddings.base import Embeddings
 from .base import VectorDatabaseInterface
 from .config import VectorDBConfig, VectorDBProvider, get_vector_db_config
 from .chroma_db import ChromaVectorDB
+from .qdrant_db import QdrantVectorDB
 
 
 class VectorDatabaseFactory:
@@ -17,7 +18,7 @@ class VectorDatabaseFactory:
     # Registry of available vector database implementations
     _providers = {
         "chroma": ChromaVectorDB,
-        # "qdrant": QdrantVectorDB,  # Will be added in Phase 2
+        "qdrant": QdrantVectorDB,
     }
     
     @classmethod
@@ -53,17 +54,10 @@ class VectorDatabaseFactory:
         # Validate provider
         if provider not in cls._providers:
             available = ", ".join(cls._providers.keys())
-            if provider == "qdrant":
-                raise RuntimeError(
-                    f"Qdrant provider not yet implemented. "
-                    f"Available providers: {available}. "
-                    f"Qdrant support will be added in Phase 2."
-                )
-            else:
-                raise ValueError(
-                    f"Unsupported vector database provider: {provider}. "
-                    f"Available providers: {available}"
-                )
+            raise ValueError(
+                f"Unsupported vector database provider: {provider}. "
+                f"Available providers: {available}"
+            )
         
         # Get the provider class
         provider_class = cls._providers[provider]
