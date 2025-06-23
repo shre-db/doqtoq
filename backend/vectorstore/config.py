@@ -13,7 +13,7 @@ VectorDBProvider = Literal["qdrant", "chroma"]
 class QdrantConfig(BaseModel):
     """Configuration for Qdrant vector database."""
     mode: Literal["local", "server"] = Field(default="local", description="Qdrant deployment mode")
-    path: str = Field(default="./data/vectorstore/qdrant/", description="Local storage path")
+    path: str = Field(default="./data/qdrant", description="Local storage path")  # Simplified default path
     url: str = Field(default="http://localhost:6333", description="Qdrant server URL")
     collection_name: str = Field(default="doqtoq_documents", description="Collection name")
     vector_size: int = Field(default=384, description="Vector dimensions (must match embedding model)")

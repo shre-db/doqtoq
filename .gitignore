@@ -55,10 +55,14 @@ vectorstore/index/
 
 # Python files
 test_streaming_performance.py
+
+# Documentation files
 PRODUCTION_READINESS.md
 VECTORDB_PHASE1.md
 VECTORDB_PHASE2.md
 RAG_ENGINE_MODERNIZATION.md
+QDRANT_DESIGN_DECISIONS.md
+QDRANT_INSTALLATION.md
 
 # Vectorstore files
 vectorstore/*.json
@@ -66,6 +70,9 @@ vectorstore/*.json
 *.sqlite3
 *.bin
 vectorstore/index/*/
+
+# Qdrant files
+./bin/
 
 # Python build artifacts
 *.egg-info/
