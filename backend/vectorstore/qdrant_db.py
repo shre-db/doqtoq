@@ -110,7 +110,7 @@ class QdrantVectorDB(VectorDatabaseInterface):
             self._vectorstore = QdrantVectorStore(
                 client=client,
                 collection_name=self.config.collection_name,
-                embeddings=self.embedding_model
+                embedding=self.embedding_model  # Note: singular 'embedding', not 'embeddings'
             )
             
             print(f"Qdrant vector database initialized successfully")

@@ -63,16 +63,17 @@ VECTORDB_PHASE2.md
 RAG_ENGINE_MODERNIZATION.md
 QDRANT_DESIGN_DECISIONS.md
 QDRANT_INSTALLATION.md
+UNIFIED_DIRECTORY_SUMMARY.md
 
 # Vectorstore files
 vectorstore/*.json
 # Ignore all artifacts in the vectorstore directory
 *.sqlite3
 *.bin
-vectorstore/index/*/
+data/vectorstore/*
 
 # Qdrant files
-./bin/
+bin/
 
 # Python build artifacts
 *.egg-info/

@@ -13,7 +13,7 @@ VectorDBProvider = Literal["qdrant", "chroma"]
 class QdrantConfig(BaseModel):
     """Configuration for Qdrant vector database."""
     mode: Literal["local", "server"] = Field(default="local", description="Qdrant deployment mode")
-    path: str = Field(default="./data/qdrant", description="Local storage path")  # Simplified default path
+    path: str = Field(default="./data/vectorstore/qdrant", description="Local storage path")
     url: str = Field(default="http://localhost:6333", description="Qdrant server URL")
     collection_name: str = Field(default="doqtoq_documents", description="Collection name")
     vector_size: int = Field(default=384, description="Vector dimensions (must match embedding model)")
@@ -39,13 +39,13 @@ class QdrantConfig(BaseModel):
     @field_validator('path')
     @classmethod
     def validate_path(cls, v):
-        # Ensure path ends with a separator for consistency
-        return str(Path(v))
+        # Preserve relative path formatting
+        return v
 
 
 class ChromaConfig(BaseModel):
     """Configuration for Chroma vector database."""
-    persist_directory: str = Field(default="backend/vectorstore/index", description="Persistence directory")
+    persist_directory: str = Field(default="./data/vectorstore/chroma", description="Persistence directory")
     collection_name: str = Field(default="doqtoq_documents", description="Collection name")
     collection_metadata: Dict[str, str] = Field(
         default_factory=lambda: {"hnsw:space": "cosine"},
@@ -55,7 +55,8 @@ class ChromaConfig(BaseModel):
     @field_validator('persist_directory')
     @classmethod
     def validate_persist_directory(cls, v):
-        return str(Path(v))
+        # Preserve relative path formatting
+        return v
 
 
 class VectorDBConfig(BaseModel):
@@ -109,7 +110,7 @@ def get_vector_db_config() -> VectorDBConfig:
         "provider": provider,
         "qdrant": {
             "mode": os.getenv("QDRANT_MODE", "local"),
-            "path": os.getenv("QDRANT_PATH", "./data/vectorstore/qdrant/"),
+            "path": os.getenv("QDRANT_PATH", "./data/vectorstore/qdrant"),
             "url": os.getenv("QDRANT_URL", "http://localhost:6333"),
             "collection_name": os.getenv("QDRANT_COLLECTION", "doqtoq_documents"),
             "vector_size": int(os.getenv("QDRANT_VECTOR_SIZE", "384")),
@@ -119,7 +120,7 @@ def get_vector_db_config() -> VectorDBConfig:
             "timeout": int(os.getenv("QDRANT_TIMEOUT", "60"))
         },
         "chroma": {
-            "persist_directory": os.getenv("CHROMA_PERSIST_DIR", "backend/vectorstore/index"),
+            "persist_directory": os.getenv("CHROMA_PERSIST_DIR", "./data/vectorstore/chroma"),
             "collection_name": os.getenv("CHROMA_COLLECTION", "doqtoq_documents")
         }
     }

@@ -14,7 +14,7 @@ BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
 # Default values
-DEFAULT_DATA_DIR="./data/qdrant"
+DEFAULT_DATA_DIR="./data/vectorstore/qdrant"
 DEFAULT_BIN_DIR="./bin"
 DEFAULT_QDRANT_VERSION="latest"
 
@@ -195,9 +195,13 @@ install_docker() {
     if [[ ! -f ".env" ]]; then
         log_info "Creating .env file with Qdrant configuration..."
         cat > .env << EOF
+# Vector Database Configuration
+VECTOR_DB_PROVIDER=qdrant
+
 # Qdrant Configuration
+QDRANT_MODE=server
 QDRANT_URL=http://localhost:6333
-QDRANT_DATA_DIR=$QDRANT_DATA_DIR
+QDRANT_PATH=$QDRANT_DATA_DIR
 
 # Add your other environment variables here
 # GOOGLE_API_KEY=your_key_here
@@ -211,7 +215,7 @@ EOF
             echo "" >> .env
             echo "# Qdrant Configuration" >> .env
             echo "QDRANT_URL=http://localhost:6333" >> .env
-            echo "QDRANT_DATA_DIR=$QDRANT_DATA_DIR" >> .env
+            echo "QDRANT_PATH=$QDRANT_DATA_DIR" >> .env
         fi
         log_success "Updated .env file"
     fi
@@ -366,9 +370,12 @@ install_native() {
     if [[ ! -f ".env" ]]; then
         log_info "Creating .env file with Qdrant configuration..."
         cat > .env << EOF
+# Vector Database Configuration
+VECTOR_DB_PROVIDER=qdrant
+
 # Qdrant Configuration
-QDRANT_URL=http://localhost:6333
-QDRANT_DATA_DIR=$QDRANT_DATA_DIR
+QDRANT_MODE=local
+QDRANT_PATH=$QDRANT_DATA_DIR
 
 # Add your other environment variables here
 # GOOGLE_API_KEY=your_key_here
