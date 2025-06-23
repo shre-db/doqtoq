@@ -6,8 +6,7 @@ from langchain_core.runnables.history import RunnableWithMessageHistory
 
 from backend.chunker import chunk_document
 from backend.embedder import get_embedding_model, EmbeddingProvider
-from backend.retriever import get_basic_retriever
-from backend.vectorstore.vector_db import get_vectorstore, store_embeddings
+from backend.vectorstore import get_vector_database
 from backend.llm_wrapper import get_google_chat_model, get_mistral_chat_model, get_ollama_chat_model
 from backend.prompts.prompt_templates import load_prompt_template
 from backend.utils import (
@@ -42,7 +41,7 @@ class DocumentRAG:
         self.embedding_provider = embedding_provider
         self.embedding_model = embedding_model
         self.streaming = streaming
-        self.vectorstore = None
+        self.vector_db = None  # Changed from vectorstore to vector_db
         self.retriever = None
         self.llm = None
         self.chain = None
@@ -68,15 +67,15 @@ class DocumentRAG:
                 model_name=self.embedding_model
             )
             
-            print("Creating vectorstore...")
-            self.vectorstore = get_vectorstore(embedding_model, clear_existing=True)
+            print("Creating vector database...")
+            self.vector_db = get_vector_database(embedding_model, clear_existing=True)
             
             print("Storing embeddings...")
-            store_embeddings(self.vectorstore, chunks)
+            self.vector_db.add_documents(chunks)
             
             # 3. Setup retriever with configurable top_k
             print(f"Setting up retriever with top_k: {self.top_k}")
-            self.retriever = get_basic_retriever(self.vectorstore, k=self.top_k)
+            self.retriever = self.vector_db.get_retriever(k=self.top_k)
             
             # 4. Setup LLM with configurable temperature and streaming
             print(f"Setting up LLM with provider: {self.model_provider}")
@@ -124,14 +123,14 @@ class DocumentRAG:
     def _get_similarity_metrics(self, question):
         """Get similarity scores for the question."""
         try:
-            if not self.vectorstore:
-                print(f"Warning: Vectorstore not initialized")
+            if not self.vector_db:
+                print(f"Warning: Vector database not initialized")
                 return {
                     "similarity_score": 1.0,
                     "avg_similarity": 1.0
                 }
                 
-            docs_with_scores = self.vectorstore.similarity_search_with_score(question, k=self.top_k)
+            docs_with_scores = self.vector_db.similarity_search_with_score(question, k=self.top_k)
             if docs_with_scores:
                 scores = [score for _, score in docs_with_scores]
                 scores_dict = {
@@ -264,7 +263,7 @@ class DocumentRAG:
                     self.llm = get_ollama_chat_model(temperature=self.temperature, streaming=self.streaming)
             
             if top_k is not None:
-                self.retriever = get_basic_retriever(self.vectorstore, k=self.top_k)
+                self.retriever = self.vector_db.get_retriever(k=self.top_k)
             
             # Rebuild the chain if any components changed
             if llm_changed or settings_changed:
@@ -461,15 +460,14 @@ Please provide context for: {question}"""
     def _is_query_off_topic_enhanced(self, retrieved_docs: list, question: str) -> bool:
         """Enhanced off-topic detection using cosine distance and content heuristics."""
         try:
-            # Chroma returns cosine distance: lower is better, 0 = identical
-            docs_with_scores = self.vectorstore.similarity_search_with_score(question, k=self.top_k)
+            # Use the new vector database API for similarity search with scores
+            docs_with_scores = self.vector_db.similarity_search_with_score(question, k=self.top_k)
 
             if docs_with_scores:
                 scores = [score for _, score in docs_with_scores]
                 min_score = min(scores)
                 avg_score = sum(scores) / len(scores)
                 print(f"Similarity scores for '{question}': min={min_score:.3f}, avg={avg_score:.3f}")
-
 
                 # Cosine distance interpretation:
                 # - 0.0 to 0.5: Very relevant
@@ -551,6 +549,62 @@ Please provide context for: {question}"""
             "multilingual": model_info.get("multilingual", False),
             "full_model_path": model_info.get("full_model_path", "")
         }
+    
+    def get_vector_db_info(self) -> Dict[str, Any]:
+        """
+        Get information about the current vector database configuration.
+        
+        Returns:
+            Dict containing vector database provider, collection info, and status
+        """
+        if not self.vector_db:
+            return {"status": "not_initialized"}
+        
+        try:
+            # Get collection information from the vector database
+            collection_info = self.vector_db.get_collection_info()
+            
+            # Add RAG-specific information
+            rag_info = {
+                "rag_initialized": True,
+                "retriever_top_k": self.top_k,
+                "embedding_provider": self.embedding_provider,
+                "embedding_model": self.embedding_model,
+                "llm_provider": self.model_provider,
+                "streaming_enabled": self.streaming
+            }
+            
+            # Merge collection info with RAG info
+            collection_info.update(rag_info)
+            return collection_info
+            
+        except Exception as e:
+            return {
+                "status": "error",
+                "error": str(e),
+                "rag_initialized": self.vector_db is not None
+            }
+
+    def get_vector_count(self) -> int:
+        """
+        Get the number of vectors stored in the database.
+        
+        Returns:
+            Number of vectors stored
+        """
+        if not self.vector_db:
+            return 0
+        
+        try:
+            if hasattr(self.vector_db, 'get_vector_count'):
+                return self.vector_db.get_vector_count()
+            else:
+                # Fallback: get from collection info
+                info = self.vector_db.get_collection_info()
+                return info.get('vector_count', info.get('count', 0))
+        except Exception as e:
+            print(f"Error getting vector count: {e}")
+            return 0
 
 def initialize_rag_pipeline(
     file_path: str,

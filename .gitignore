@@ -58,6 +58,7 @@ test_streaming_performance.py
 PRODUCTION_READINESS.md
 VECTORDB_PHASE1.md
 VECTORDB_PHASE2.md
+RAG_ENGINE_MODERNIZATION.md
 
 # Vectorstore files
 vectorstore/*.json
