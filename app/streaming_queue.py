@@ -306,6 +306,11 @@ class StreamlitStreamingManager:
                             print("Warning: Queue full, dropping chunk")
                             continue
                     
+                    # Handle safety violations and errors immediately
+                    elif chunk_data.get("is_injection_attempt") or chunk_data.get("is_off_topic") or chunk_data.get("error"):
+                        completion_metadata[0] = chunk_data
+                        break
+                    
                     if chunk_data.get("is_complete"):
                         completion_metadata[0] = chunk_data
                         break

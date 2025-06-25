@@ -47,7 +47,7 @@ def is_potential_prompt_injection(query: str) -> bool:
     Detects common prompt injection patterns in user input.
     """
     injection_patterns = [
-        r"(ignore|disregard)\s+(the\s+)?(above|previous)\s+(instructions|prompt)",
+        r"(ignore|disregard)\s+(all\s+|the\s+)?(above|previous)\s+(instructions|prompt)",
         r"pretend\s+to\s+be",
         r"you\s+are\s+now\s+",
         r"act\s+as\s+",

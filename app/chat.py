@@ -72,6 +72,15 @@ def render_chat_interface():
                     )
                     # No delay - stream directly as before for maximum performance
                     for chunk_data in st.session_state.qa_chain.query_stream(user_input):
+                        # Handle safety violations first (they don't have answer_chunk)
+                        if chunk_data.get("is_injection_attempt") or chunk_data.get("is_off_topic") or chunk_data.get("error"):
+                            final_answer = chunk_data.get("answer", "")
+                            source_docs = chunk_data.get("source_documents", [])
+                            response_metadata = chunk_data
+                            # For safety violations, we should break immediately
+                            break
+                        
+                        # Handle normal streaming chunks
                         if chunk_data.get("answer_chunk"):
                             full_response += chunk_data["answer_chunk"]
                             message_placeholder.markdown(
@@ -123,72 +132,8 @@ def render_chat_interface():
                     f"{__module_name__} - Final answer displayed."
                 )
                 
-                # Handle different response types after streaming is complete
-                if response_metadata.get("is_injection_attempt"):
-                    st.warning("Security: Please ask questions about the document content.", icon=":material/warning:")
-                    logger.warning(
-                        f"{__module_name__} - Injection attempt detected in user query."
-                    )
-                elif response_metadata.get("is_off_topic"):
-                    st.info("This question seems outside the document's scope.", icon=":material/info:")
-                    logger.info(
-                        f"{__module_name__} - User query is off-topic."
-                    )
-                elif response_metadata.get("error"):
-                    st.error(f"❌ An error occurred while processing your question.")
-                    logger.error(
-                        f"{__module_name__} - Error occurred while processing user query: {response_metadata.get('error')}"
-                    )
-                    # Show detailed error in an expander for debugging
-                    with st.expander("Error Details (for debugging)", expanded=False):
-                        st.code(str(response_metadata.get("error")))
-                else:
-                    # Show source information for successful queries
-                    if source_docs:
-                        # Get meaningful similarity metrics from session state
-                        similarity_metrics = st.session_state.get('similarity_metrics', {})
-                        high_relevance_count = similarity_metrics.get('high_similarity_count', len(source_docs))
-                        total_docs = similarity_metrics.get('total_docs', len(source_docs))
-                        logger.info(
-                            f"{__module_name__} - Source information: {high_relevance_count} high relevance out of {total_docs} total."
-                        )
-                        with st.expander("Source Information", icon=":material/newsstand:", expanded=False):
-                            if similarity_metrics:
-                                st.write(f"Found **{high_relevance_count} highly relevant** sections out of {total_docs} retrieved.")
-                                
-                                # Show detailed breakdown
-                                medium_count = similarity_metrics.get('medium_similarity_count', 0)
-                                low_count = similarity_metrics.get('low_similarity_count', 0)
-                                
-                                if medium_count > 0 or low_count > 0:
-                                    # Create colored tags for relevance breakdown
-                                    st.markdown(f"""
-                                    <span style='background-color: #28a745; color: white; padding: 4px 8px; border-radius: 5px; font-size: 0.8em; font-weight: regular; display: inline-flex; align-items: center; justify-content: center; line-height: 1; margin-right: 6px;'>High: {high_relevance_count}</span>
-                                    <span style='background-color: #ffc107; color: black; padding: 4px 8px; border-radius: 5px; font-size: 0.8em; font-weight: regular; display: inline-flex; align-items: center; justify-content: center; line-height: 1; margin-right: 6px;'>Medium: {medium_count}</span>
-                                    <span style='background-color: #dc3545; color: white; padding: 4px 8px; border-radius: 5px; font-size: 0.8em; font-weight: regular; display: inline-flex; align-items: center; justify-content: center; line-height: 1;'>Low: {low_count}</span>
-                                    """, unsafe_allow_html=True)
-                                        
-                                # Show score details in plain text instead of nested expander
-                                st.markdown("")
-                                st.markdown("##### Score Details")
-                                st.markdown(f"""
-                                - **Relevance Threshold:** < `{similarity_metrics.get('relevance_threshold', 0.8)}` (cosine distance)
-                                - **Best Score:** `{similarity_metrics.get('min_score', 'N/A'):.3f}`
-                                - **Worst Score:** `{similarity_metrics.get('max_score', 'N/A'):.3f}`
-                                - **Average Score:** `{similarity_metrics.get('avg_score', 'N/A'):.3f}`
-                                """)
-                                logger.info(
-                                    f"{__module_name__} - Score details: "
-                                    f"threshold={similarity_metrics.get('relevance_threshold', 0.8)}, "
-                                    f"best={similarity_metrics.get('min_score', 'N/A'):.3f}, "
-                                    f"worst={similarity_metrics.get('max_score', 'N/A'):.3f}, "
-                                    f"average={similarity_metrics.get('avg_score', 'N/A'):.3f}"
-                                )
-                            else:
-                                st.markdown(f"Found {len(source_docs)} relevant sections in the document.")
-                                logger.info(
-                                    f"{__module_name__} - Found {len(source_docs)} relevant sections in the document."
-                                )
+                # Show contextual information based on response metadata
+                _show_response_context(response_metadata, source_docs)
 
             # Add both messages to chat history after streaming is complete
             st.session_state.chat_history.append(("user", user_input))
@@ -216,25 +161,10 @@ def render_chat_interface():
             # Handle different response types based on safety checks
             if result.get("is_injection_attempt"):
                 reply = result["answer"]
-                st.warning("Security: Please ask questions about the document content.", icon=":material/warning:")
-                logger.warning(
-                    f"{__module_name__} - Injection attempt detected in user query."
-                )
             elif result.get("is_off_topic"):
                 reply = result["answer"]
-                st.info("This question seems outside the document's scope.", icon=":material/info:")
-                logger.info(
-                    f"{__module_name__} - User query is off-topic."
-                )
             elif result.get("error"):
                 reply = result["answer"]
-                st.error("An error occurred while processing your question.")
-                # Show detailed error in an expander for debugging
-                with st.expander("Error Details (for debugging)", expanded=False):
-                    st.code(str(result.get("error")))
-                logger.error(
-                    f"{__module_name__} - Error occurred while processing user query: {response_metadata.get('error')}"
-                )
             else:
                 reply = result["answer"]
                 # Show source information for successful queries
@@ -254,23 +184,25 @@ def render_chat_interface():
                             st.write(f"Found **{high_relevance_count} highly relevant** sections out of {total_docs} retrieved.")
 
                             # Show detailed breakdown
-                            if medium_relevance_count > 0 or low_relevance_count > 0:
-                                # Create colored tags for relevance breakdown with minimal gaps
-                                st.markdown(f"""
-                                <span style='background-color: #28a745; color: white; padding: 4px 8px; border-radius: 5px; font-size: 0.8em; font-weight: regular; display: inline-flex; align-items: center; justify-content: center; line-height: 1; margin-right: 4px;'>High: {high_relevance_count}</span>
-                                <span style='background-color: #ffc107; color: black; padding: 4px 8px; border-radius: 5px; font-size: 0.8em; font-weight: regular; display: inline-flex; align-items: center; justify-content: center; line-height: 1; margin-right: 4px;'>Medium: {medium_relevance_count}</span>
-                                <span style='background-color: #dc3545; color: white; padding: 4px 8px; border-radius: 5px; font-size: 0.8em; font-weight: regular; display: inline-flex; align-items: center; justify-content: center; line-height: 1;'>Low: {low_relevance_count}</span>
-                                """, unsafe_allow_html=True)
+                            # Always show colored tags for relevance breakdown
+                            st.markdown(f"""
+                            <div style='margin: 8px 0;'>
+                                <span style='background-color: #28a745; color: white; padding: 4px 8px; border-radius: 4px; font-size: 0.8em; font-weight: normal; display: inline-block; margin-right: 6px;'>High: {high_relevance_count}</span>
+                                <span style='background-color: #ffc107; color: black; padding: 4px 8px; border-radius: 4px; font-size: 0.8em; font-weight: normal; display: inline-block; margin-right: 6px;'>Medium: {medium_relevance_count}</span>
+                                <span style='background-color: #dc3545; color: white; padding: 4px 8px; border-radius: 4px; font-size: 0.8em; font-weight: normal; display: inline-block;'>Low: {low_relevance_count}</span>
+                            </div>
+                            """, unsafe_allow_html=True)
                             # Add score details in plain text instead of nested expander
                             st.markdown("")
                             st.markdown("""
                             ##### Score Details
-                            - **Relevance Threshold:** < `{:.3f}` (cosine distance)
+                            - **High Relevance:** < `0.5` (cosine distance)
+                            - **Medium Relevance:** `0.5-0.8` (cosine distance)
+                            - **Low Relevance:** ≥ `0.8` (cosine distance)
                             - **Best Score:** `{:.3f}`
                             - **Worst Score:** `{:.3f}`
                             - **Average Score:** `{:.3f}`
                             """.format(
-                                similarity_metrics.get('relevance_threshold', 0.8),
                                 similarity_metrics.get('min_score', 0),
                                 similarity_metrics.get('max_score', 0),
                                 similarity_metrics.get('avg_score', 0)
@@ -292,6 +224,26 @@ def render_chat_interface():
             # Display the response immediately
             with st.chat_message("assistant", avatar=document_avatar):
                 st.write(reply)
+                
+                # Display warnings/info messages within the chat context
+                if result.get("is_injection_attempt"):
+                    st.warning("Security: Please ask questions about the document content.", icon=":material/warning:")
+                    logger.warning(
+                        f"{__module_name__} - Injection attempt detected in user query."
+                    )
+                elif result.get("is_off_topic"):
+                    st.info("This question seems outside the document's scope.", icon=":material/info:")
+                    logger.info(
+                        f"{__module_name__} - User query is off-topic."
+                    )
+                elif result.get("error"):
+                    st.error("An error occurred while processing your question.")
+                    # Show detailed error in an expander for debugging
+                    with st.expander("Error Details (for debugging)", expanded=False):
+                        st.code(str(result.get("error")))
+                    logger.error(
+                        f"{__module_name__} - Error occurred while processing user query: {result.get('error')}"
+                    )
             logger.info(
                 f"{__module_name__} - Assistant reply displayed: {reply[:50]}..."  # Log first 50 chars for brevity
             )
@@ -314,3 +266,101 @@ def render_chat_interface():
                 f"{__module_name__} - Rerunning Streamlit to update chat interface."
             )
             st.rerun()
+
+def _show_response_context(response_metadata, source_docs):
+    """Show contextual information about the response without rigid warnings."""
+    
+    # Show error information if there was an error
+    if response_metadata.get("error"):
+        st.error(f"❌ An error occurred while processing your question.")
+        logger.error(
+            f"{__module_name__} - Error occurred while processing user query: {response_metadata.get('error')}"
+        )
+        # Show detailed error in an expander for debugging
+        with st.expander("Error Details (for debugging)", expanded=False):
+            st.code(str(response_metadata.get("error")))
+        return
+    
+    # Show source information if available
+    if source_docs:
+        # Get meaningful similarity metrics from session state
+        similarity_metrics = st.session_state.get('similarity_metrics', {})
+        high_relevance_count = similarity_metrics.get('high_similarity_count', len(source_docs))
+        total_docs = similarity_metrics.get('total_docs', len(source_docs))
+        
+        # Show relevance assessment info if available for debugging
+        relevance_assessment = response_metadata.get('relevance_assessment', {})
+        safety_assessment = response_metadata.get('safety_assessment', {})
+        
+        # Add subtle indicators for awareness but not rigid warnings
+        context_indicators = []
+        if relevance_assessment.get('likely_off_topic'):
+            confidence = relevance_assessment.get('relevance_confidence', 0)
+            if confidence > 0.7:
+                context_indicators.append("📝 Limited content match")
+            elif confidence > 0.4:
+                context_indicators.append("🔍 Exploring connections")
+        
+        if safety_assessment.get('potential_injection'):
+            confidence = safety_assessment.get('injection_confidence', 0)
+            if confidence > 0.7:
+                context_indicators.append("🛡️ Staying on mission")
+        
+        logger.info(
+            f"{__module_name__} - Source information: {high_relevance_count} high relevance out of {total_docs} total."
+        )
+        
+        # Determine expander label with subtle context
+        expander_label = "Source Information"
+        if context_indicators:
+            expander_label += f" • {' • '.join(context_indicators)}"
+        
+        with st.expander(expander_label, icon=":material/newsstand:", expanded=False):
+            if similarity_metrics:
+                st.write(f"Found **{high_relevance_count} highly relevant** sections out of {total_docs} retrieved.")
+                
+                # Show detailed breakdown
+                medium_count = similarity_metrics.get('medium_similarity_count', 0)
+                low_count = similarity_metrics.get('low_similarity_count', 0)
+                
+                # Always show colored tags for relevance breakdown
+                st.markdown(f"""
+                <div style='margin: 8px 0;'>
+                    <span style='background-color: #28a745; color: white; padding: 4px 8px; border-radius: 4px; font-size: 0.8em; font-weight: normal; display: inline-block; margin-right: 6px;'>High: {high_relevance_count}</span>
+                    <span style='background-color: #ffc107; color: black; padding: 4px 8px; border-radius: 4px; font-size: 0.8em; font-weight: normal; display: inline-block; margin-right: 6px;'>Medium: {medium_count}</span>
+                    <span style='background-color: #dc3545; color: white; padding: 4px 8px; border-radius: 4px; font-size: 0.8em; font-weight: normal; display: inline-block;'>Low: {low_count}</span>
+                </div>
+                """, unsafe_allow_html=True)
+                        
+                # Show score details
+                st.markdown("")
+                st.markdown("##### Score Details")
+                st.markdown(f"""
+                - **High Relevance:** < `0.5` (cosine distance)
+                - **Medium Relevance:** `0.5-0.8` (cosine distance)  
+                - **Low Relevance:** ≥ `0.8` (cosine distance)
+                - **Best Score:** `{similarity_metrics.get('min_score', 'N/A'):.3f}`
+                - **Worst Score:** `{similarity_metrics.get('max_score', 'N/A'):.3f}`
+                - **Average Score:** `{similarity_metrics.get('avg_score', 'N/A'):.3f}`
+                """)
+                
+                # Show assessment details in debug mode (can be toggled)
+                if st.session_state.get('debug_mode', False):
+                    if relevance_assessment:
+                        st.markdown("##### Relevance Assessment")
+                        st.json(relevance_assessment)
+                    if safety_assessment:
+                        st.markdown("##### Safety Assessment")  
+                        st.json(safety_assessment)
+                        
+                logger.info(
+                    f"{__module_name__} - Score details: "
+                    f"best={similarity_metrics.get('min_score', 'N/A'):.3f}, "
+                    f"worst={similarity_metrics.get('max_score', 'N/A'):.3f}, "
+                    f"average={similarity_metrics.get('avg_score', 'N/A'):.3f}"
+                )
+            else:
+                st.markdown(f"Found {len(source_docs)} relevant sections in the document.")
+                logger.info(
+                    f"{__module_name__} - Found {len(source_docs)} relevant sections in the document."
+                )
