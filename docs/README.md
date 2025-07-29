@@ -8,7 +8,7 @@ Welcome to the DoqToq documentation! Here you'll find comprehensive guides and r
 - **[Main README](../README.md)** - Project overview, installation, and basic usage
 - **[API Documentation](API.md)** - Comprehensive API reference and programmatic usage
 
-### Deployment & Operations  
+### Deployment & Operations
 - **[Deployment Guide](DEPLOYMENT.md)** - Production deployment, Docker, and cloud hosting
 
 ### Vision & Roadmap

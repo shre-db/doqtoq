@@ -6,21 +6,20 @@ Setup script for PyPI distribution
 
 import os
 import re
-from setuptools import setup, find_packages
+
+from setuptools import find_packages, setup
 
 # Read the contents of README file
 this_directory = os.path.abspath(os.path.dirname(__file__))
 with open(os.path.join(this_directory, "README.md"), encoding="utf-8") as f:
     long_description = f.read()
 
+
 # Read requirements
 def read_requirements(filename):
     with open(filename, "r") as f:
-        return [
-            line.strip()
-            for line in f
-            if line.strip() and not line.startswith("#")
-        ]
+        return [line.strip() for line in f if line.strip() and not line.startswith("#")]
+
 
 # Extract version from __init__.py
 def get_version():
@@ -28,10 +27,13 @@ def get_version():
     if os.path.exists(version_file):
         with open(version_file, "r") as f:
             content = f.read()
-            version_match = re.search(r'^__version__ = [\'"]([^\'"]*)[\'"]', content, re.M)
+            version_match = re.search(
+                r'^__version__ = [\'"]([^\'"]*)[\'"]', content, re.M
+            )
             if version_match:
                 return version_match.group(1)
     return "0.1.0"  # fallback version
+
 
 requirements = read_requirements("requirements.txt")
 dev_requirements = read_requirements("requirements-dev.txt")

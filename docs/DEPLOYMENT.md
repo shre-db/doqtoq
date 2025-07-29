@@ -458,20 +458,20 @@ from pythonjsonlogger import jsonlogger
 
 def setup_production_logging():
     """Setup structured logging for production"""
-    
+
     # Create JSON formatter
     formatter = jsonlogger.JsonFormatter(
         '%(asctime)s %(name)s %(levelname)s %(message)s'
     )
-    
+
     # Console handler
     console_handler = logging.StreamHandler(sys.stdout)
     console_handler.setFormatter(formatter)
-    
+
     # File handler
     file_handler = logging.FileHandler('/app/logs/app.log')
     file_handler.setFormatter(formatter)
-    
+
     # Configure root logger
     root_logger = logging.getLogger()
     root_logger.setLevel(logging.INFO)
@@ -500,7 +500,7 @@ networks:
   doqtoq_internal:
     driver: bridge
     internal: true
-  
+
   doqtoq_external:
     driver: bridge
 
@@ -509,7 +509,7 @@ services:
     networks:
       - doqtoq_internal
       - doqtoq_external
-  
+
   database:
     networks:
       - doqtoq_internal  # Only internal network
@@ -522,14 +522,14 @@ services:
 server {
     listen 443 ssl http2;
     server_name your-domain.com;
-    
+
     ssl_certificate /etc/ssl/certs/your-domain.crt;
     ssl_certificate_key /etc/ssl/private/your-domain.key;
-    
+
     ssl_protocols TLSv1.2 TLSv1.3;
     ssl_ciphers ECDHE-RSA-AES256-GCM-SHA512:DHE-RSA-AES256-GCM-SHA512;
     ssl_prefer_server_ciphers off;
-    
+
     location / {
         proxy_pass http://doqtoq:8501;
         proxy_set_header Host $host;
@@ -566,7 +566,7 @@ def add_security_headers():
    ```bash
    # Check if port is in use
    lsof -i :8501
-   
+
    # Use different port
    streamlit run app/main.py --server.port=8502
    ```
@@ -575,7 +575,7 @@ def add_security_headers():
    ```bash
    # Monitor memory usage
    docker stats
-   
+
    # Increase memory limits
    docker run -m 4g doqtoq:latest
    ```

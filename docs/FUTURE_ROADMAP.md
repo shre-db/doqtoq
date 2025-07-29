@@ -98,9 +98,9 @@ GraphRAG: Sections → Subsections → Concepts → Entities → Relationships
 "I contain information about relativity in my physics section."
 
 # GraphRAG-enhanced response:
-"I explore relativity concepts throughout my structure - starting with basic 
-principles in Chapter 2, connecting to mathematical foundations in Section 3.2, 
-and culminating in practical applications in my final chapter. Let me trace 
+"I explore relativity concepts throughout my structure - starting with basic
+principles in Chapter 2, connecting to mathematical foundations in Section 3.2,
+and culminating in practical applications in my final chapter. Let me trace
 this journey for you..."
 ```
 
@@ -129,12 +129,12 @@ class GraphEnhancedDocumentRAG(DocumentRAG):
         super().__init__(...)
         self.document_graph = self._build_document_graph()
         self.graph_retriever = GraphRetriever(self.document_graph)
-    
+
     def _build_document_graph(self):
         # Extract entities and relationships from chunks
         # Build graph structure using NLP techniques
         pass
-    
+
     def query_with_graph(self, question: str):
         # Combine vector search with graph traversal
         vector_results = self.retriever.get_relevant_documents(question)
@@ -158,22 +158,22 @@ Transform DoqToq from a document conversation tool into a **multi-document knowl
 ```
 User: "What do you all think about climate change solutions?"
 
-Research Paper: "From my scientific perspective, I present data showing 
+Research Paper: "From my scientific perspective, I present data showing
 renewable energy adoption rates..."
 
-Policy Document: "I complement that with regulatory frameworks that could 
+Policy Document: "I complement that with regulatory frameworks that could
 accelerate implementation..."
 
-Technical Manual: "And I can detail the practical engineering challenges 
+Technical Manual: "And I can detail the practical engineering challenges
 we'd need to overcome..."
 ```
 
 #### Document-to-Document Interactions
 ```
-Research Paper: "@Policy Document - Your regulatory timeline conflicts 
+Research Paper: "@Policy Document - Your regulatory timeline conflicts
 with my data on technology readiness"
 
-Policy Document: "Interesting point, @Research Paper. Let me revise my 
+Policy Document: "Interesting point, @Research Paper. Let me revise my
 assessment based on your findings..."
 
 User: "Can you two find a middle ground?"
@@ -189,7 +189,7 @@ class DoqToqGroup:
         self.conversation_manager = ConversationOrchestrator()
         self.synthesis_engine = CrossDocumentSynthesizer()
         self.shared_knowledge_graph = SharedKnowledgeGraph()
-    
+
     def group_chat(self, user_message: str):
         # Determine which documents should respond
         # Orchestrate multi-document conversation
@@ -205,7 +205,7 @@ class DocumentAgent(GraphEnhancedDocumentRAG):
         self.personality = personality_profile
         self.peer_awareness = PeerDocumentManager()
         self.collaboration_history = CollaborationMemory()
-    
+
     def respond_in_group(self, message: str, context: GroupContext):
         # Consider other documents' perspectives
         # Reference peer documents when relevant

@@ -1,10 +1,12 @@
 __module_name__ = "chunker"
 
+import json
+import os
+
 from langchain_core.documents import Document
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from PyPDF2 import PdfReader
-import os
-import json
+
 
 def load_file(file_path: str) -> str:
     ext = os.path.splitext(file_path)[-1].lower()
@@ -24,13 +26,16 @@ def load_file(file_path: str) -> str:
             return f.read()
     else:
         raise ValueError(f"Unsupported file type: {ext}")
-    
-def chunk_document(file_path: str, chunk_size: int = 800, chunk_overlap: int = 100) -> list[Document]:
+
+
+def chunk_document(
+    file_path: str, chunk_size: int = 800, chunk_overlap: int = 100
+) -> list[Document]:
     text = load_file(file_path)
     splitter = RecursiveCharacterTextSplitter(
         chunk_size=chunk_size,
         chunk_overlap=chunk_overlap,
-        separators=["\n\n", "\n", ".", " ", ""]
+        separators=["\n\n", "\n", ".", " ", ""],
     )
     chunks = splitter.create_documents([text])
     return chunks

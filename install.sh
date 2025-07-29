@@ -102,15 +102,15 @@ check_python_version() {
         print_error "Python 3 is not installed"
         return 1
     fi
-    
+
     local python_version=$(python3 -c "import sys; print(f'{sys.version_info.major}.{sys.version_info.minor}')")
     local required_version=$PYTHON_MIN_VERSION
-    
+
     if [ "$(printf '%s\n' "$required_version" "$python_version" | sort -V | head -n1)" != "$required_version" ]; then
         print_error "Python $python_version is installed, but Python $required_version or higher is required"
         return 1
     fi
-    
+
     print_success "Python $python_version is installed"
     return 0
 }
@@ -121,20 +121,20 @@ check_dependencies() {
         print_warning "Skipping dependency checks"
         return 0
     fi
-    
+
     print_status "Checking system dependencies..."
-    
+
     # Check Python
     if ! check_python_version; then
         print_error "Python version check failed"
         exit 1
     fi
-    
+
     # Check Git
     if ! command_exists git; then
         print_warning "Git is not installed. Some features may not work."
     fi
-    
+
     print_success "System dependencies check completed"
 }
 
@@ -143,9 +143,9 @@ detect_install_method() {
     if [ -n "$INSTALL_METHOD" ]; then
         return 0
     fi
-    
+
     print_status "Auto-detecting best installation method..."
-    
+
     if command_exists conda; then
         INSTALL_METHOD="conda"
         print_status "Found conda, using conda installation method"
@@ -164,7 +164,7 @@ detect_install_method() {
 # Install with conda
 install_conda() {
     print_status "Installing DoqToq with conda..."
-    
+
     # Check if environment exists
     if conda env list | grep -q "^$DOQTOQ_ENV_NAME "; then
         print_warning "Environment '$DOQTOQ_ENV_NAME' already exists"
@@ -176,7 +176,7 @@ install_conda() {
             print_status "Using existing environment"
         fi
     fi
-    
+
     # Create environment from YAML
     if [ -f "environment.yaml" ]; then
         print_status "Creating environment from environment.yaml..."
@@ -187,13 +187,13 @@ install_conda() {
         conda activate "$DOQTOQ_ENV_NAME"
         pip install -r requirements.txt
     fi
-    
+
     if [ "$INSTALL_DEV" = true ]; then
         print_status "Installing development dependencies..."
         conda activate "$DOQTOQ_ENV_NAME"
         pip install -r requirements-dev.txt
     fi
-    
+
     print_success "Conda installation completed!"
     print_status "To activate the environment, run: conda activate $DOQTOQ_ENV_NAME"
 }
@@ -201,25 +201,25 @@ install_conda() {
 # Install with pip
 install_pip() {
     print_status "Installing DoqToq with pip..."
-    
+
     # Check if we should create a virtual environment
     if [ -z "$VIRTUAL_ENV" ]; then
         print_status "Creating virtual environment..."
         python3 -m venv "$DOQTOQ_ENV_NAME"
         source "$DOQTOQ_ENV_NAME/bin/activate"
     fi
-    
+
     # Upgrade pip
     python3 -m pip install --upgrade pip
-    
+
     # Install requirements
     pip install -r requirements.txt
-    
+
     if [ "$INSTALL_DEV" = true ]; then
         print_status "Installing development dependencies..."
         pip install -r requirements-dev.txt
     fi
-    
+
     print_success "Pip installation completed!"
     if [ -z "$VIRTUAL_ENV" ]; then
         print_status "To activate the environment, run: source $DOQTOQ_ENV_NAME/bin/activate"
@@ -229,11 +229,11 @@ install_pip() {
 # Install with Docker
 install_docker() {
     print_status "Installing DoqToq with Docker..."
-    
+
     # Build Docker image
     print_status "Building Docker image..."
     docker build -f Dockerfile.venv -t doqtoq:latest .
-    
+
     # Create docker-compose.yml if it doesn't exist
     if [ ! -f "docker-compose.yml" ]; then
         print_status "Creating docker-compose.yml..."
@@ -253,7 +253,7 @@ services:
     restart: unless-stopped
 EOF
     fi
-    
+
     print_success "Docker installation completed!"
     print_status "To run DoqToq, use: docker-compose up"
 }
@@ -275,20 +275,20 @@ setup_env() {
 # Post-installation setup
 post_install() {
     print_status "Running post-installation setup..."
-    
+
     # Create necessary directories
     mkdir -p data/uploads
     mkdir -p logs
-    
+
     # Setup environment variables
     setup_env
-    
+
     # Install pre-commit hooks if development mode
     if [ "$INSTALL_DEV" = true ] && command_exists pre-commit; then
         print_status "Installing pre-commit hooks..."
         pre-commit install
     fi
-    
+
     print_success "Post-installation setup completed!"
 }
 
@@ -296,11 +296,11 @@ post_install() {
 main() {
     print_status "DoqToq Installation Script"
     print_status "========================="
-    
+
     parse_args "$@"
     check_dependencies
     detect_install_method
-    
+
     case $INSTALL_METHOD in
         conda)
             install_conda
@@ -316,9 +316,9 @@ main() {
             exit 1
             ;;
     esac
-    
+
     post_install
-    
+
     # Print final instructions
     print_success "🎉 DoqToq installation completed successfully!"
     print_status ""

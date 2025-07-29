@@ -281,11 +281,11 @@ def upload_document():
     file = request.files['document']
     file_path = f"uploads/{file.filename}"
     file.save(file_path)
-    
+
     rag = DocumentRAG(file_path=file_path)
     doc_id = str(hash(file_path))
     rag_instances[doc_id] = rag
-    
+
     return jsonify({"document_id": doc_id})
 
 @app.route('/query', methods=['POST'])
@@ -293,13 +293,13 @@ def query_document():
     data = request.json
     doc_id = data['document_id']
     question = data['question']
-    
+
     if doc_id not in rag_instances:
         return jsonify({"error": "Document not found"}), 404
-    
+
     rag = rag_instances[doc_id]
     response = rag.query(question)
-    
+
     return jsonify({"response": response})
 
 if __name__ == '__main__':
@@ -319,11 +319,11 @@ if uploaded_file:
     # Save uploaded file
     with open(f"temp_{uploaded_file.name}", "wb") as f:
         f.write(uploaded_file.getbuffer())
-    
+
     # Initialize RAG
     if 'rag' not in st.session_state:
         st.session_state.rag = DocumentRAG(f"temp_{uploaded_file.name}")
-    
+
     # Chat interface
     question = st.text_input("Ask a question:")
     if question:

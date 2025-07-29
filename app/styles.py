@@ -2,11 +2,13 @@ __module_name__ = "styles"
 
 import streamlit as st
 
+
 def inject_custom_css():
-    st.markdown("""
+    st.markdown(
+        """
         <style>
             @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@400;500;600;700&display=swap');
-            
+
             html, body {
                 font-family: 'Segoe UI', sans-serif;
                 background-color: #f7f9fc;
@@ -27,7 +29,7 @@ def inject_custom_css():
                 letter-spacing: -0.025em;
                 line-height: 1.1;
             }
-            
+
             /* Custom styling for the main title specifically */
             .doqtoq-title {
                 font-family: 'Inter', 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif !important;
@@ -42,4 +44,6 @@ def inject_custom_css():
                 text-shadow: 0 2px 4px rgba(0,0,0,0.1);
             }
         </style>
-    """, unsafe_allow_html=True)
+    """,
+        unsafe_allow_html=True,
+    )

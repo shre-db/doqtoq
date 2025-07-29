@@ -46,7 +46,7 @@ check_project_root() {
 # Check dependencies
 check_dependencies() {
     local missing_deps=()
-    
+
     case $1 in
         "docker")
             if ! command -v docker &> /dev/null; then
@@ -65,7 +65,7 @@ check_dependencies() {
             fi
             ;;
     esac
-    
+
     if [[ ${#missing_deps[@]} -gt 0 ]]; then
         log_error "Missing dependencies: ${missing_deps[*]}"
         log_info "Please install the missing dependencies and try again"
@@ -78,7 +78,7 @@ get_user_preferences() {
     echo
     log_info "=== DoqToq Qdrant Setup ==="
     echo
-    
+
     # Installation method
     echo "Choose installation method:"
     echo "1) Docker (recommended for development)"
@@ -86,7 +86,7 @@ get_user_preferences() {
     echo
     read -p "Enter your choice [1]: " install_method
     install_method=${install_method:-1}
-    
+
     case $install_method in
         1)
             INSTALL_METHOD="docker"
@@ -99,13 +99,13 @@ get_user_preferences() {
             exit 1
             ;;
     esac
-    
+
     # Data directory
     echo
     log_info "Qdrant will store vector data in a persistent directory."
     read -p "Data directory [$DEFAULT_DATA_DIR]: " QDRANT_DATA_DIR
     QDRANT_DATA_DIR=${QDRANT_DATA_DIR:-$DEFAULT_DATA_DIR}
-    
+
     # For native installation, get additional preferences
     if [[ "$INSTALL_METHOD" == "native" ]]; then
         # Qdrant version
@@ -113,7 +113,7 @@ get_user_preferences() {
         log_info "Available versions: https://github.com/qdrant/qdrant/releases"
         read -p "Qdrant version [$DEFAULT_QDRANT_VERSION]: " QDRANT_VERSION
         QDRANT_VERSION=${QDRANT_VERSION:-$DEFAULT_QDRANT_VERSION}
-        
+
         # Binary directory
         echo
         log_info "Choose where to install Qdrant binary:"
@@ -123,7 +123,7 @@ get_user_preferences() {
         echo
         read -p "Enter your choice [1]: " bin_choice
         bin_choice=${bin_choice:-1}
-        
+
         case $bin_choice in
             1)
                 QDRANT_BIN_DIR="$DEFAULT_BIN_DIR"
@@ -147,7 +147,7 @@ get_user_preferences() {
                 ;;
         esac
     fi
-    
+
     # Summary
     echo
     log_info "=== Configuration Summary ==="
@@ -161,7 +161,7 @@ get_user_preferences() {
     echo
     read -p "Continue with this configuration? [Y/n]: " confirm
     confirm=${confirm:-Y}
-    
+
     if [[ ! "$confirm" =~ ^[Yy]$ ]]; then
         log_info "Setup cancelled by user"
         exit 0
@@ -171,11 +171,11 @@ get_user_preferences() {
 # Create directories
 create_directories() {
     log_info "Creating directories..."
-    
+
     # Create data directory
     mkdir -p "$QDRANT_DATA_DIR"
     log_success "Created data directory: $QDRANT_DATA_DIR"
-    
+
     # Create binary directory for native installation
     if [[ "$INSTALL_METHOD" == "native" ]]; then
         if [[ "$USE_SUDO" == "true" ]]; then
@@ -190,7 +190,7 @@ create_directories() {
 # Install Docker version
 install_docker() {
     log_info "Setting up Qdrant with Docker..."
-    
+
     # Create .env file with Qdrant settings if it doesn't exist
     if [[ ! -f ".env" ]]; then
         log_info "Creating .env file with Qdrant configuration..."
@@ -219,7 +219,7 @@ EOF
         fi
         log_success "Updated .env file"
     fi
-    
+
     # Start Qdrant service
     log_info "Starting Qdrant service..."
     if command -v docker-compose &> /dev/null; then
@@ -227,28 +227,28 @@ EOF
     else
         docker compose --profile qdrant up -d qdrant
     fi
-    
+
     # Wait for Qdrant to be ready
     log_info "Waiting for Qdrant to be ready..."
     local max_attempts=30
     local attempt=1
-    
+
     while [[ $attempt -le $max_attempts ]]; do
         if curl -s http://localhost:6333/health > /dev/null 2>&1; then
             log_success "Qdrant is ready!"
             break
         fi
-        
+
         if [[ $attempt -eq $max_attempts ]]; then
             log_error "Qdrant failed to start within timeout"
             exit 1
         fi
-        
+
         log_info "Attempt $attempt/$max_attempts - waiting for Qdrant..."
         sleep 2
         ((attempt++))
     done
-    
+
     # Display status
     echo
     log_success "Qdrant Docker installation completed!"
@@ -269,7 +269,7 @@ EOF
 get_architecture() {
     local arch
     arch=$(uname -m)
-    
+
     case $arch in
         x86_64)
             echo "x86_64"
@@ -288,7 +288,7 @@ get_architecture() {
 get_os() {
     local os
     os=$(uname -s | tr '[:upper:]' '[:lower:]')
-    
+
     case $os in
         linux)
             echo "unknown-linux-gnu"
@@ -306,11 +306,11 @@ get_os() {
 # Install native binary
 install_native() {
     log_info "Installing Qdrant native binary..."
-    
+
     local arch os download_url
     arch=$(get_architecture)
     os=$(get_os)
-    
+
     # Construct download URL
     if [[ "$QDRANT_VERSION" == "latest" ]]; then
         # Get latest version from GitHub API
@@ -323,28 +323,28 @@ install_native() {
         QDRANT_VERSION="$latest_version"
         log_info "Latest Qdrant version: $QDRANT_VERSION"
     fi
-    
+
     download_url="https://github.com/qdrant/qdrant/releases/download/${QDRANT_VERSION}/qdrant-${arch}-${os}.tar.gz"
-    
+
     log_info "Downloading Qdrant from: $download_url"
-    
+
     # Download and extract
     local temp_dir
     temp_dir=$(mktemp -d)
-    
+
     if ! curl -L "$download_url" -o "$temp_dir/qdrant.tar.gz"; then
         log_error "Failed to download Qdrant"
         rm -rf "$temp_dir"
         exit 1
     fi
-    
+
     log_info "Extracting Qdrant binary..."
     if ! tar -xzf "$temp_dir/qdrant.tar.gz" -C "$temp_dir"; then
         log_error "Failed to extract Qdrant"
         rm -rf "$temp_dir"
         exit 1
     fi
-    
+
     # Install binary
     log_info "Installing Qdrant binary to $QDRANT_BIN_DIR..."
     if [[ "$USE_SUDO" == "true" ]]; then
@@ -354,10 +354,10 @@ install_native() {
         cp "$temp_dir/qdrant" "$QDRANT_BIN_DIR/"
         chmod +x "$QDRANT_BIN_DIR/qdrant"
     fi
-    
+
     # Cleanup
     rm -rf "$temp_dir"
-    
+
     # Create systemd service (optional)
     if [[ "$USE_SUDO" == "true" ]] && command -v systemctl &> /dev/null; then
         read -p "Create systemd service for Qdrant? [y/N]: " create_service
@@ -365,7 +365,7 @@ install_native() {
             create_systemd_service
         fi
     fi
-    
+
     # Create .env file
     if [[ ! -f ".env" ]]; then
         log_info "Creating .env file with Qdrant configuration..."
@@ -383,7 +383,7 @@ QDRANT_PATH=$QDRANT_DATA_DIR
 EOF
         log_success "Created .env file"
     fi
-    
+
     echo
     log_success "Qdrant native installation completed!"
     echo
@@ -406,11 +406,11 @@ EOF
 # Create systemd service
 create_systemd_service() {
     log_info "Creating systemd service..."
-    
+
     local service_file="/etc/systemd/system/qdrant.service"
     local abs_data_dir
     abs_data_dir=$(realpath "$QDRANT_DATA_DIR")
-    
+
     sudo tee "$service_file" > /dev/null << EOF
 [Unit]
 Description=Qdrant Vector Database
@@ -429,20 +429,20 @@ StandardError=journal
 [Install]
 WantedBy=multi-user.target
 EOF
-    
+
     # Create qdrant user
     if ! id "qdrant" &>/dev/null; then
         sudo useradd --system --no-create-home --shell /bin/false qdrant
     fi
-    
+
     # Set permissions
     sudo chown -R qdrant:qdrant "$abs_data_dir"
-    
+
     # Enable and start service
     sudo systemctl daemon-reload
     sudo systemctl enable qdrant
     sudo systemctl start qdrant
-    
+
     log_success "Systemd service created and started"
     echo "  - Status: sudo systemctl status qdrant"
     echo "  - Logs: sudo journalctl -u qdrant -f"
@@ -456,7 +456,7 @@ main() {
     get_user_preferences
     check_dependencies "$INSTALL_METHOD"
     create_directories
-    
+
     case $INSTALL_METHOD in
         "docker")
             install_docker
@@ -465,7 +465,7 @@ main() {
             install_native
             ;;
     esac
-    
+
     echo
     log_success "Qdrant setup completed successfully!"
     echo

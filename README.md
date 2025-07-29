@@ -114,10 +114,10 @@ make setup-dev
    ```bash
    # Using the startup script
    ./start_app.sh
-   
+
    # Or directly with Streamlit
    streamlit run app/main.py
-   
+
    # Or using Make
    make run
    ```
@@ -168,7 +168,7 @@ graph TD
     A --> D[Chat Interface]
     B --> E[LLM Wrapper]
     C --> F[ChromaDB]
-    
+
     style A fill:#ff6b6b
     style B fill:#4ecdc4
     style C fill:#45b7d1
@@ -193,7 +193,7 @@ Your documents don't just answer questions, they embody their content. DoqToq us
 ### Smart Relevance Scoring
 Advanced similarity metrics help you understand how well the AI matched your question to document content:
 - **High Relevance**: Direct content matches (green)
-- **Medium Relevance**: Related content (yellow)  
+- **Medium Relevance**: Related content (yellow)
 - **Low Relevance**: Tangential matches (red)
 
 ### Streaming Intelligence
@@ -248,7 +248,7 @@ doqtoq/
 │       ├── vector_db.py                       # ChromaDB integration and operations
 │       └── index/                             # Persistent vector storage
 │
-├── assets/   
+├── assets/
 │   ├── doqtoq_cover_photo.png                 # Banner image
 │   ├── DoqToq-logo.svg                        # Main application logo
 │   ├── scroll-light.svg                       # Document avatar icon
@@ -534,7 +534,7 @@ docker-compose restart
 - **Network**: Configure CDN for static assets in production
 
 ### Support Resources
-- Check the [troubleshooting guide](docs/DEPLOYMENT.md#troubleshooting) 
+- Check the [troubleshooting guide](docs/DEPLOYMENT.md#troubleshooting)
 - Search existing [GitHub issues](https://github.com/shre-db/doqtoq/issues)
 - Review [performance benchmarks](tests/)
 
@@ -542,7 +542,7 @@ docker-compose restart
 
 ### Documentation
 - **[API Reference](docs/API.md)**: Complete API documentation
-- **[Deployment Guide](docs/DEPLOYMENT.md)**: Comprehensive deployment instructions  
+- **[Deployment Guide](docs/DEPLOYMENT.md)**: Comprehensive deployment instructions
 - **[Future Roadmap](docs/FUTURE_ROADMAP.md)**: Planned features and development roadmap
 - **[Contributing Guidelines](CONTRIBUTING.md)**: How to contribute to DoqToq
 - **[Security Policy](SECURITY.md)**: Security guidelines and vulnerability reporting
@@ -620,4 +620,4 @@ DoqToq is built with love using:
 *Transform your documents into intelligent conversational partners today with DoqToq!*
 
 ---
-*Last updated: June 18, 2025* 
+*Last updated: June 18, 2025*

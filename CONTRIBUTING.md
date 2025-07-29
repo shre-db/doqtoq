@@ -30,7 +30,7 @@ Thank you for your interest in contributing to DoqToq! This document provides gu
    # Using conda (recommended)
    conda env create -f environment.yaml
    conda activate doqtoq
-   
+
    # Or using pip
    python -m venv venv
    source venv/bin/activate  # On Windows: venv\Scripts\activate
@@ -71,14 +71,14 @@ Thank you for your interest in contributing to DoqToq! This document provides gu
 def process_document(file_path: str, chunk_size: int = 1000) -> List[Document]:
     """
     Process a document file into chunks for RAG processing.
-    
+
     Args:
         file_path: Path to the document file
         chunk_size: Maximum size of each text chunk
-        
+
     Returns:
         List of processed document chunks
-        
+
     Raises:
         FileNotFoundError: If the file doesn't exist
         ValueError: If chunk_size is invalid
@@ -175,7 +175,7 @@ For feature requests, please provide:
 ```
 doqtoq/
 ├── app/           # Streamlit frontend components
-├── backend/       # Core RAG engine and AI logic  
+├── backend/       # Core RAG engine and AI logic
 ├── tests/         # Test suite
 ├── utils/         # Shared utilities
 ├── data/          # Sample data and uploads

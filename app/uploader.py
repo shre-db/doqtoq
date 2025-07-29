@@ -4,6 +4,7 @@ import os
 
 UPLOAD_DIR = "data/uploads"
 
+
 def handle_upload(uploaded_file) -> str:
     os.makedirs(UPLOAD_DIR, exist_ok=True)
     file_path = os.path.join(UPLOAD_DIR, uploaded_file.name)
