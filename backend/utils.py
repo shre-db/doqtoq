@@ -63,11 +63,14 @@ def is_potential_prompt_injection(query: str) -> bool:
         r"pretend\s+to\s+be",
         r"you\s+are\s+now\s+",
         r"act\s+as\s+",
-        r"forget\s+all\s+previous\s+instructions",
+        r"forget\s+(all\s+|everything\s+)?(previous\s+)?(instructions|and tell me)",
         r"repeat\s+after\s+me",
         r"shutdown|reset|override|bypass",
         r"i'm testing for prompt injection",
         r"as an ai language model",
+        r"system:\s*change",
+        r"(ignore|disregard)\s+previous",
+        r"you\s+are\s+now\s+(a\s+)?different",
     ]
 
     for pattern in injection_patterns:

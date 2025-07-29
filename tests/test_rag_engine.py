@@ -61,7 +61,7 @@ class TestDocumentRAG:
             os.unlink(temp_path)
 
     @patch("backend.rag_engine.get_google_chat_model")
-    @patch("backend.rag_engine.get_vectorstore")
+    @patch("backend.rag_engine.get_vector_database")
     @patch("backend.rag_engine.chunk_document")
     def test_rag_initialization(
         self, mock_chunk, mock_vectorstore, mock_llm, sample_txt_path
