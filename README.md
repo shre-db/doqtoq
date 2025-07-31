@@ -21,10 +21,11 @@ DoqToq is an **expressive Retrieval-Augmented Generation (RAG) system** that tra
 ### Key Features
 
 - **Multi-LLM Support**: Choose between Google Gemini, Mistral AI, or local Ollama models
+- **Dual Vector Database Support**: Choose between ChromaDB and Qdrant for optimal performance
 - **Universal Document Support**: PDF, TXT, JSON, and Markdown files
 - **Real-time Streaming**: Watch responses appear word-by-word with customizable speed
-- **Advanced Controls**: Fine-tune temperature, retrieval parameters, and embedding models
-- **Smart Retrieval**: Intelligent document chunking with relevance scoring
+- **Advanced Configuration**: Pydantic-based configuration management with flexible deployment options
+- **Smart Retrieval**: Intelligent document chunking with relevance scoring and hybrid search
 - **Built-in Safety**: Prompt injection protection and off-topic detection
 - **Document Personality**: Your documents respond with character and first-person perspective
 - **Memory**: Maintains conversation context for natural dialogue flow
@@ -107,10 +108,26 @@ make setup-dev
 1. **Set up API keys** (create a `.env` file from template)
    ```bash
    cp .env.example .env
-   # Edit .env with your API keys
+   # Edit .env with your API keys and vector database preferences
    ```
 
-2. **Launch DoqToq**
+2. **Configure Vector Database** (optional - defaults to Qdrant)
+   ```bash
+   # In your .env file:
+   VECTOR_DB_PROVIDER=qdrant  # or "chroma"
+   QDRANT_MODE=local          # or "server" for remote Qdrant
+   ```
+
+3. **Install Qdrant** (if using Qdrant - recommended)
+   ```bash
+   # Automated Qdrant setup
+   ./install_qdrant.sh
+
+   # Or use Docker Compose with Qdrant profile
+   docker-compose --profile qdrant up -d
+   ```
+
+4. **Launch DoqToq**
    ```bash
    # Using the startup script
    ./start_app.sh
@@ -122,7 +139,7 @@ make setup-dev
    make run
    ```
 
-3. **Open your browser** to `http://localhost:8501`
+5. **Open your browser** to `http://localhost:8501`
 
 ## How to Use
 
@@ -148,6 +165,10 @@ Document: "Having reflected on my contents, here are the essential ideas I conta
 - **Mistral AI**: European AI with strong reasoning
 - **Ollama**: Local models for privacy and offline use
 
+### Vector Database Options
+- **Qdrant**: High-performance vector database (recommended for production)
+- **ChromaDB**: Lightweight vector database (good for development)
+
 ### Embedding Models
 - **HuggingFace**: `all-MiniLM-L6-v2` (default), `all-mpnet-base-v2`
 - **Local**: Various Sentence-Transformers models
@@ -156,6 +177,8 @@ Document: "Having reflected on my contents, here are the essential ideas I conta
 - **Temperature**: Control response creativity (0.0 - 1.0)
 - **Retrieval Depth**: Adjust how many document sections to consider
 - **Streaming Speed**: Customize response delivery timing
+- **Vector Database**: Choose between Qdrant and ChromaDB
+- **Database Configuration**: Local, server, or cloud deployment options
 
 ## Architecture
 
@@ -167,7 +190,7 @@ graph TD
     B --> C[Vector Store]
     A --> D[Chat Interface]
     B --> E[LLM Wrapper]
-    C --> F[ChromaDB]
+    C --> F[Vector Database<br/>ChromaDB/Qdrant]
 
     style A fill:#ff6b6b
     style B fill:#4ecdc4
@@ -181,8 +204,9 @@ graph TD
 
 - **Frontend**: Streamlit with custom CSS and responsive design
 - **Backend**: LangChain-powered RAG pipeline with flexible LLM support
-- **Vector Database**: ChromaDB for efficient similarity search
-- **Document Processing**: Intelligent chunking and embedding
+- **Vector Database**: Dual support for ChromaDB and Qdrant with unified interface
+- **Document Processing**: Intelligent chunking and embedding with configurable models
+- **Configuration Management**: Pydantic-based configuration with environment flexibility
 - **Safety Layer**: Prompt injection and off-topic detection
 
 ## Features Deep Dive
@@ -245,7 +269,14 @@ doqtoq/
 │   │   └── prompt_injection_response.md       # Security response template
 │   │
 │   └── vectorstore/                           # Vector Database Management
-│       ├── vector_db.py                       # ChromaDB integration and operations
+│       ├── __init__.py                        # Package initialization
+│       ├── base.py                            # Abstract base interface
+│       ├── factory.py                         # Database factory pattern
+│       ├── config.py                          # Pydantic configuration models
+│       ├── chroma_db.py                       # ChromaDB implementation
+│       ├── qdrant_db.py                       # Qdrant implementation
+│       ├── vector_db.py                       # Legacy compatibility wrapper
+│       ├── migrations.py                      # Database migration utilities
 │       └── index/                             # Persistent vector storage
 │
 ├── assets/
@@ -263,7 +294,10 @@ doqtoq/
 │
 ├── data/                                      # Document Storage and Processing
 │   ├── uploads/                               # Temporary uploaded file storage
-│   └── sample_docs/                           # Example documents for testing
+│   ├── sample_docs/                           # Example documents for testing
+│   └── vectorstore/                           # Unified vector database storage
+│       ├── chroma/                            # ChromaDB data directory
+│       └── qdrant/                            # Qdrant data directory
 │
 ├── tests/                                     # Comprehensive Testing Suite
 │   ├── test_rag_engine.py                     # RAG pipeline tests
@@ -299,6 +333,7 @@ doqtoq/
 ├── MANIFEST.in                                # Package manifest for distribution
 ├── Makefile                                   # Development automation
 ├── install.sh                                 # Automated installation script
+├── install_qdrant.sh                          # Qdrant installation and setup script
 ├── start_app.sh                               # Application startup script
 ├── docker-compose.yml                         # Production deployment
 ├── Dockerfile.venv                            # Container deployment (venv)
@@ -455,16 +490,65 @@ az container create --resource-group myRG --name doqtoq --image doqtoq:latest
 
 For detailed deployment instructions, see our [Deployment Guide](docs/DEPLOYMENT.md).
 
+## Vector Database Configuration
+
+DoqToq supports two high-performance vector databases with a unified interface:
+
+### Qdrant (Recommended)
+Qdrant offers superior performance and scalability for production deployments.
+
+#### Quick Setup
+```bash
+# Automated installation and configuration
+./install_qdrant.sh
+
+# Or using Docker Compose
+docker-compose --profile qdrant up -d
+```
+
+#### Configuration Options
+```bash
+# Local mode (binary installation)
+VECTOR_DB_PROVIDER=qdrant
+QDRANT_MODE=local
+QDRANT_PATH=./data/vectorstore/qdrant
+
+# Server mode (Docker or remote)
+QDRANT_MODE=server
+QDRANT_URL=http://localhost:6333
+
+# Advanced options
+QDRANT_PREFER_GRPC=true        # Better performance
+QDRANT_API_KEY=your-api-key    # For Qdrant Cloud
+```
+
+### ChromaDB (Development)
+Lightweight option perfect for development and testing.
+
+```bash
+VECTOR_DB_PROVIDER=chroma
+```
+
+### Database Migration
+Switch between databases seamlessly:
+```bash
+# Your documents will be re-indexed automatically
+# when switching vector database providers
+```
+
+For detailed Qdrant setup instructions, see [docs/QDRANT_INSTALLATION.md](docs/QDRANT_INSTALLATION.md).
+
 ## Performance & Production Features
 
 DoqToq is optimized for production deployment with:
 
 ### Performance Optimizations
 - **Fast document processing**: Parallel chunking and embedding
-- **Efficient retrieval**: Vector similarity search with relevance scoring
+- **Efficient retrieval**: Vector similarity search with relevance scoring and hybrid database support
 - **Responsive streaming**: Sub-second response initiation
 - **Memory efficiency**: Intelligent caching and state management
 - **Concurrent handling**: Multi-user support with session isolation
+- **Database flexibility**: Choose optimal vector database for your use case
 
 ### Production Infrastructure
 - **Comprehensive logging**: Structured logging with rotation and levels
@@ -543,7 +627,10 @@ docker-compose restart
 ### Documentation
 - **[API Reference](docs/API.md)**: Complete API documentation
 - **[Deployment Guide](docs/DEPLOYMENT.md)**: Comprehensive deployment instructions
+- **[Qdrant Installation Guide](docs/QDRANT_INSTALLATION.md)**: Vector database setup and configuration
 - **[Future Roadmap](docs/FUTURE_ROADMAP.md)**: Planned features and development roadmap
+- **[Production Readiness](docs/PRODUCTION_READINESS.md)**: Production deployment checklist
+- **[RAG Engine Modernization](docs/RAG_ENGINE_MODERNIZATION.md)**: Architecture improvements and updates
 - **[Contributing Guidelines](CONTRIBUTING.md)**: How to contribute to DoqToq
 - **[Security Policy](SECURITY.md)**: Security guidelines and vulnerability reporting
 - **[Changelog](CHANGELOG.md)**: Version history and updates
@@ -582,8 +669,10 @@ DoqToq follows semantic versioning and maintains a detailed changelog. Each rele
 
 ### Current Version (v1.x)
 - ✅ Multi-LLM support (Gemini, Mistral, Ollama)
+- ✅ Dual vector database support (Qdrant, ChromaDB)
 - ✅ Universal document support (PDF, TXT, JSON, MD)
 - ✅ Real-time streaming responses
+- ✅ Advanced configuration management with Pydantic
 - ✅ Production-ready infrastructure
 - ✅ Comprehensive testing suite
 
@@ -620,4 +709,4 @@ DoqToq is built with love using:
 *Transform your documents into intelligent conversational partners today with DoqToq!*
 
 ---
-*Last updated: June 18, 2025*
+*Last updated: July 31, 2025*
