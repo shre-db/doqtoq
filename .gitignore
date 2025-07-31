@@ -1,64 +1,335 @@
-# Python cache and compiled files
+# =======================
+# DoqToq .gitignore
+# =======================
+#
+# This file excludes from git:
+# - Python build artifacts and cache files
+# - Virtual environment directories
+# - Code quality tool outputs (mypy, bandit, etc.)
+# - IDE/editor configuration files
+# - OS-specific files
+# - Application logs and debug files
+# - Uploaded documents and vector databases
+# - Temporary and backup files
+# - Generated documentation
+#
+# While preserving:
+# - Essential documentation files (.md)
+# - Configuration files (.yaml, .toml)
+# - Asset files in /assets/ directory
+# - Shell scripts and installation files
+# =======================
+
+# ==================
+# Python
+# ==================
+# Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
+*$py.class
 *.so
 
-# Jupyter Notebook checkpoints
-.ipynb_checkpoints/
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
 
-# Environments
-.venv/
+# PyInstaller
+*.manifest
+*.spec
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+.pytest_cache/
+cover/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# IPython
+profile_default/
+ipython_config.py
+
+# pyenv
+.python-version
+
+# pipenv
+Pipfile.lock
+
+# poetry
+poetry.lock
+
+# pdm
+.pdm.toml
+
+# PEP 582
+__pypackages__/
+
+# Celery stuff
+celerybeat-schedule
+celerybeat.pid
+
+# SageMath parsed files
+*.sage.py
+
+# ==================
+# Virtual Environments
+# ==================
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+.venv
 env/
 venv/
 ENV/
+env.bak/
+venv.bak/
 *.env
-.env
 
-# Logs and debug files
+# ==================
+# Code Quality Tools
+# ==================
+# MyPy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Pyre type checker
+.pyre/
+
+# pytype static type analyzer
+.pytype/
+
+# Bandit security reports
+bandit-report.json
+bandit-report.txt
+
+# Safety reports
+safety-report.json
+
+# pre-commit
+.pre-commit-config.yaml.bak
+
+# ==================
+# IDEs and Editors
+# ==================
+# VSCode
+.vscode/
+*.code-workspace
+
+# PyCharm
+.idea/
+*.swp
+*.swo
+
+# Sublime Text
+*.sublime-project
+*.sublime-workspace
+
+# Vim
+*~
+*.swp
+*.swo
+
+# Emacs
+*~
+\#*\#
+/.emacs.desktop
+/.emacs.desktop.lock
+*.elc
+auto-save-list
+tramp
+.\#*
+
+# ==================
+# Operating System
+# ==================
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Windows
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+*.stackdump
+[Dd]esktop.ini
+$RECYCLE.BIN/
+*.cab
+*.msi
+*.msix
+*.msm
+*.msp
+*.lnk
+
+# Linux
+*~
+
+# ==================
+# Streamlit
+# ==================
+.streamlit/secrets.toml
+.streamlit/config.toml
+
+# ==================
+# Application Specific
+# ==================
+# Logs
+logs/
 *.log
 *.out
+latex_streaming_debug_*.log
 
-# OS files
-.DS_Store
-Thumbs.db
+# Upload and data directories
+data/uploads/*
+!data/uploads/.gitkeep
+data/vectorstore/*
+!data/vectorstore/.gitkeep
 
-# Streamlit cache
-.streamlit/secrets.toml
+# Vector database files (but preserve backend/vectorstore/ Python code)
+*.sqlite3
+*.sqlite
+*.db
+*.bin
+*.index
+*.faiss
 
-# Uploads and generated data
-data/uploads/
-vectorstore/index/
+# Qdrant specific data
+bin/qdrant
+qdrant-data/
 
-# VSCode, PyCharm, etc.
-.vscode/
-.idea/
+# Performance reports
+tests/streaming_performance_report_*.json
+tests/test_streaming_performance.py
+
+# Temporary files
+*.tmp
+*.temp
+*.bak
+*.backup
 
 # Docker artifacts
 *.pid
 *.tar
 *.img
 
-# Image files
+# Keep essential scripts
+!*.sh
+!activate_doqtoq.sh
+
+# ==================
+# Assets (Conditional)
+# ==================
+# Ignore most image files but allow specific asset directories
 *.png
 *.jpg
 *.jpeg
 *.gif
 *.svg
+*.webp
+*.ico
 
-# Temporary files
-*.tmp
-
-# Do not ignore the .png image inside the docs directory
+# But keep essential assets
 !assets/*.png
 !assets/*.svg
-!assets/*.png
+!assets/*.ico
+!docs/**/*.png
+!docs/**/*.svg
 
-# Python files
-test_streaming_performance.py
+# ==================
+# Documentation
+# ==================
+# Ignore generated docs but keep essential documentation
+docs/build/
+docs/_build/
+site/
+docs/PRODUCTION_READINESS.md
+docs/QDRANT_DESIGN_DECISIONS.md
+docs/QDRANT_INSTALLATION.md
+docs/RAG_ENGINE_MODERNIZATION.md
+docs/QDRANT_DESIGN_DECISIONS.md
+docs/UNIFIED_DIRECTORY_SUMMARY.md
+docs/VECTORDB_PHASE1.md
+docs/VECTORDB_PHASE2.md
 
-# Vectorstore files
-vectorstore/*.json
-# Ignore all artifacts in the vectorstore directory
-*.sqlite3
-*.bin
-vectorstore/index/*/
+
+
+# # Keep ALL markdown files by default
+
+# ==================
+# Development Tools
+# ==================
+# Node.js (if used for any tooling)
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Terraform
+*.tfstate
+*.tfstate.*
+.terraform/
+
+# ==================
+# Cloud and Deployment
+# ==================
+# AWS
+.aws/
+
+# Google Cloud
+.gcp/
+gcp-key.json
+
+# Kubernetes
+*.kubeconfig
+
+# ==================
+# Miscellaneous
+# ==================
+# Backup files
+*.bak
+*.backup
+*.old
+
+# Archive files
+*.7z
+*.dmg
+*.gz
+*.iso
+*.jar
+*.rar
+*.tar
+*.zip

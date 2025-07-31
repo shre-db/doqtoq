@@ -1,23 +1,29 @@
 __module_name__ = "llm_wrapper"
 
+import os
+from typing import Any, Dict, Iterator, List, Optional
+
+import ollama
+from dotenv import load_dotenv
+from langchain_core.callbacks.manager import CallbackManagerForLLMRun
+from langchain_core.language_models.chat_models import BaseChatModel
+from langchain_core.messages import AIMessage, BaseMessage, HumanMessage, SystemMessage
+from langchain_core.outputs import ChatGeneration, ChatResult
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_mistralai.chat_models import ChatMistralAI
 from langchain_ollama import ChatOllama
-from langchain_core.language_models.chat_models import BaseChatModel
-from langchain_core.messages import BaseMessage, HumanMessage, AIMessage, SystemMessage
-from langchain_core.outputs import ChatResult, ChatGeneration
-from langchain_core.callbacks.manager import CallbackManagerForLLMRun
-from dotenv import load_dotenv
-import os
-import ollama
-from typing import Any, Dict, Iterator, List, Optional
 
 load_dotenv()
 
 GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
 MISTRAL_API_KEY = os.getenv("MISTRAL_API_KEY")
 
-def get_google_chat_model(model_name: str = "gemini-2.5-flash-preview-04-17", temperature: float = 0.7, streaming: bool = False) -> ChatGoogleGenerativeAI:
+
+def get_google_chat_model(
+    model_name: str = "gemini-2.5-flash",
+    temperature: float = 0.7,
+    streaming: bool = False,
+) -> ChatGoogleGenerativeAI:
     """
     Returns a Gemini chat model using the Google Generative AI API.
     """
@@ -34,7 +40,12 @@ def get_google_chat_model(model_name: str = "gemini-2.5-flash-preview-04-17", te
     except Exception as e:
         raise ValueError(f"Failed to initialize Google chat model: {str(e)}")
 
-def get_mistral_chat_model(model_name: str = "mistral-medium", temperature: float = 0.7, streaming: bool = False) -> ChatMistralAI:
+
+def get_mistral_chat_model(
+    model_name: str = "mistral-medium",
+    temperature: float = 0.7,
+    streaming: bool = False,
+) -> ChatMistralAI:
     """
     Returns a Mistral chat model using the Mistral API.
     Valid model names: mistral-tiny, mistral-small, mistral-medium
@@ -51,12 +62,14 @@ def get_mistral_chat_model(model_name: str = "mistral-medium", temperature: floa
         )
     except Exception as e:
         raise ValueError(f"Failed to initialize Mistral chat model: {str(e)}")
-    
 
-def get_ollama_chat_model(model_name: str = "mistral:latest", temperature: float = 0.7, streaming: bool = True) -> ChatOllama:
+
+def get_ollama_chat_model(
+    model_name: str = "mistral:latest", temperature: float = 0.7, streaming: bool = True
+) -> ChatOllama:
     """
     Returns an Ollama chat model using the Ollama API.
-    
+
     Args:
         model_name: The Ollama model to use. Common options:
                    - mistral:latest (default, 7B parameters)
@@ -65,10 +78,10 @@ def get_ollama_chat_model(model_name: str = "mistral:latest", temperature: float
                    - llama3:8b (if available)
         temperature: Sampling temperature (0.0 to 1.0)
         streaming: Whether to enable streaming responses
-    
+
     Returns:
         ChatOllama instance ready for use
-        
+
     Raises:
         ValueError: If model initialization fails
     """

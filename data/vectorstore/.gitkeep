@@ -1,0 +1,2 @@
+# This file ensures the vectorstore directory is tracked by git
+# but the vector database files themselves are ignored

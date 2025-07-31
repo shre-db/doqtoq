@@ -19,8 +19,8 @@ WORKDIR /app
 COPY environment.yaml .
 
 # Create the conda environment
-RUN conda env create -f environment.yaml && \
-    conda clean --all --yes
+RUN conda env create --file=environment.yaml \
+ && conda clean --all --yes
 
 # Copy the rest of the application code
 COPY . .
