@@ -225,6 +225,11 @@ jobs:
         fetch-depth: 0
         token: ${{ secrets.GITHUB_TOKEN }}
 
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+
     - name: Semantic Release
       uses: cycjimmy/semantic-release-action@v4
       env:
@@ -232,5 +237,9 @@ jobs:
       with:
         semantic_version: 19
         extra_plugins: |
+          @semantic-release/commit-analyzer
+          @semantic-release/release-notes-generator
           @semantic-release/changelog
+          @semantic-release/github
           @semantic-release/git
+          conventional-changelog-conventionalcommits
