@@ -122,4 +122,4 @@ For security-related questions or concerns:
 - **Vulnerability Reports**: Use private channels described above
 - **Security Feature Requests**: Use GitHub issues with security label
 
-Thank you for helping keep ![DoqToq-Logo](./assets/DoqToq-logo.svg) DoqToq secure!
+Thank you for helping keep DoqToq secure!

@@ -1,4 +1,7 @@
-# ![DoqToq Logo](./assets/DoqToq-logo.svg) DoqToq
+<div style="display: inline-flex; align-items: center;">
+  <img src="./assets/DoqToq-logo.png" width="128" height="128" />
+  <span style="margin-left: 5px; font-size: 2.7em; color: white;"><b>DoqToq</b></span>
+</div>
 
 ![DoqToq Cover Image](./assets/doqtoq_cover_photo.png)
 
@@ -14,9 +17,15 @@
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue?style=flat-square)](LICENSE.md)
 [![Production Ready](https://img.shields.io/badge/Production-Ready-success?style=flat-square)](#production--performance-features)
 
+![DoqToq-social-preview](./assets/DoqToq-social-preview.png)
+
 ## What is DoqToq?
 
-DoqToq is an **expressive Retrieval-Augmented Generation (RAG) system** that transforms documents into engaging conversational partners. Upload any document, and it becomes a knowledgeable entity that discusses its own content with personality, intelligence, and first-person perspective.
+DoqToq is an **AI-Augmented Document platform** that transforms static documents into living, conversational entities. Unlike traditional systems that use documents to augment AI, DoqToq uses AI to augment documents—bringing them to life with personality, self-awareness, and the ability to engage in meaningful dialogue about their own contents.
+
+**Core Philosophy**: Your documents don't just contain knowledge—they *become* knowledgeable. Each document develops its own voice, understands its structure and themes, and can discuss itself in first-person with intelligence and personality.
+
+> 📖 **Deep Dive**: Learn more about our revolutionary approach in our [Philosophy Document](docs/PHILOSOPHY.md)
 
 ### Key Features
 
@@ -305,6 +314,7 @@ doqtoq/
 │   └── streaming_performance_report_*.json    # Performance test results
 │
 ├── docs/                                      # Documentation
+│   ├── PHILOSOPHY.md                          # Core philosophy and revolutionary vision
 │   ├── API.md                                 # API reference documentation
 │   ├── DEPLOYMENT.md                          # Deployment guide
 │   ├── FUTURE_ROADMAP.md                      # Future development roadmap
@@ -625,6 +635,7 @@ docker-compose restart
 ## Community & Support
 
 ### Documentation
+- **[Philosophy Document](docs/PHILOSOPHY.md)**: Core principles and revolutionary vision of AI-augmented documents
 - **[API Reference](docs/API.md)**: Complete API documentation
 - **[Deployment Guide](docs/DEPLOYMENT.md)**: Comprehensive deployment instructions
 - **[Qdrant Installation Guide](docs/QDRANT_INSTALLATION.md)**: Vector database setup and configuration
@@ -685,6 +696,18 @@ Interested in what's next for DoqToq? Check out our comprehensive [Future Roadma
 - **DoqToq Groups**: Revolutionary multi-document collaboration where documents interact with each other
 - **Knowledge Synthesis**: Cross-document reasoning and emergent knowledge discovery
 - **Academic & Industry Integration**: Research opportunities and commercial applications
+
+## 🔮 DoqToq Groups - Multi-Document Collaboration - Planned Feature
+![DoqToq Groups Cover](./assets/doqtoq_groups_cover.png)
+
+### Revolutionary Vision
+
+Transform DoqToq from a document conversation tool into a **multi-document knowledge synthesis platform** where documents become collaborative entities that can interact with users and each other.
+
+### Core Concept: Documents as Collaborative Agents
+
+#### Multi-Document Chat Orchestration
+![Example-Conversation](./assets/DoqToq-Groups-conversation.png)
 
 ## License
 

@@ -4,6 +4,9 @@ Welcome to the DoqToq documentation! Here you'll find comprehensive guides and r
 
 ## Documentation Index
 
+### Core Philosophy & Vision
+- **[Philosophy Document](PHILOSOPHY.md)** - Revolutionary concept of AI-augmented documents and living knowledge entities
+
 ### User Guides
 - **[Main README](../README.md)** - Project overview, installation, and basic usage
 - **[API Documentation](API.md)** - Comprehensive API reference and programmatic usage
@@ -16,10 +19,11 @@ Welcome to the DoqToq documentation! Here you'll find comprehensive guides and r
 
 ## Quick Start
 
-1. **New to DoqToq?** Start with the [main README](../README.md)
-2. **Want to deploy?** Check the [Deployment Guide](DEPLOYMENT.md)
-3. **Building integrations?** See the [API Documentation](API.md)
-4. **Interested in contributing?** Read our [Future Roadmap](FUTURE_ROADMAP.md) and [Contributing Guidelines](../CONTRIBUTING.md)
+1. **New to DoqToq?** Start with the [Philosophy Document](PHILOSOPHY.md) to understand our revolutionary approach
+2. **Ready to try it?** Check the [main README](../README.md) for installation and setup
+3. **Want to deploy?** See the [Deployment Guide](DEPLOYMENT.md)
+4. **Building integrations?** Review the [API Documentation](API.md)
+5. **Interested in contributing?** Read our [Future Roadmap](FUTURE_ROADMAP.md) and [Contributing Guidelines](../CONTRIBUTING.md)
 
 ## Additional Resources
 
