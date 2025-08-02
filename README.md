@@ -1,8 +1,4 @@
-<div style="display: inline-flex; align-items: center;">
-  <img src="./assets/DoqToq-logo.png" width="128" height="128" />
-  <span style="margin-left: 5px; font-size: 2.7em; color: white;"><b>DoqToq</b></span>
-</div>
-
+# DoqToq
 ![DoqToq Cover Image](./assets/doqtoq_cover_photo.png)
 
 **Documents that talk — DoqToq**
