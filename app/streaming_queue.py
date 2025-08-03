@@ -16,7 +16,10 @@ import time
 from dataclasses import dataclass
 from datetime import datetime
 from enum import Enum
-from typing import Any, Callable, Dict, Iterator, Optional
+from typing import Any, Callable, Dict, Iterator, Optional, Union
+from venv import logger
+
+from streamlit.delta_generator import DeltaGenerator
 
 
 class LaTeXDebugLogger:
@@ -27,7 +30,7 @@ class LaTeXDebugLogger:
         self.log_file = None
         self.in_latex_context = False
         self.latex_start_char = 0
-        self.context_buffer = []  # Buffer for context around LaTeX
+        self.context_buffer: list[str] = []  # Buffer for context around LaTeX
         self.max_context = 10  # Characters before/after LaTeX to log
 
         if self.enabled:
@@ -37,7 +40,7 @@ class LaTeXDebugLogger:
             )
             self.log("=== LaTeX Streaming Debug Session Started ===\n")
 
-    def log(self, message: str):
+    def log(self, message: str) -> None:
         """Write message to log file"""
         if self.enabled and self.log_file:
             self.log_file.write(
@@ -76,7 +79,7 @@ class LaTeXDebugLogger:
 
         return False
 
-    def latex_completed(self, char_index: int, expression: str):
+    def latex_completed(self, char_index: int, expression: str) -> None:
         """Called when a LaTeX expression is completed"""
         if self.enabled:
             self.latex_end_char = char_index
@@ -85,13 +88,13 @@ class LaTeXDebugLogger:
             self.log(f"Expression length: {len(expression)}")
             # Will continue logging for a few more characters for context
 
-    def latex_context_end(self, char_index: int):
+    def latex_context_end(self, char_index: int) -> None:
         """Called when we're done logging LaTeX context"""
         if self.enabled:
             self.log(f"--- LATEX CONTEXT END (char {char_index}) ---\n")
             self.in_latex_context = False
 
-    def close(self):
+    def close(self) -> None:
         """Close the log file"""
         if self.enabled and self.log_file:
             self.log("=== LaTeX Streaming Debug Session Ended ===")
@@ -128,15 +131,17 @@ class LaTeXBuffer:
             tuple: (text_to_display, should_display_now)
         """
         self.char_count += 1
-        should_log = self.logger and self.logger.should_log_char(char, self.char_count)
+        if self.logger is not None:
+            should_log = self.logger.should_log_char(char, self.char_count)
 
         if should_log:
-            self.logger.log(
-                f"CHAR #{self.char_count}: '{char}' -> Buffer: '{self.buffer + char}'"
-            )
-            self.logger.log(
-                f"  State: block_math={self.in_block_math}, inline_math={self.in_inline_math}"
-            )
+            if self.logger is not None:
+                self.logger.log(
+                    f"CHAR #{self.char_count}: '{char}' -> Buffer: '{self.buffer + char}'"
+                )
+                self.logger.log(
+                    f"  State: block_math={self.in_block_math}, inline_math={self.in_inline_math}"
+                )
 
         self.buffer += char
 
@@ -148,9 +153,10 @@ class LaTeXBuffer:
                     self.in_block_math = True
                     self.in_inline_math = False  # Reset inline math flag
                     if should_log:
-                        self.logger.log(
-                            f"  -> BLOCK MATH START: Buffer now '{self.buffer}' (inline_math reset to False)"
-                        )
+                        if self.logger is not None:
+                            self.logger.log(
+                                f"  -> BLOCK MATH START: Buffer now '{self.buffer}' (inline_math reset to False)"
+                            )
                     return "", False  # Don't display yet
                 else:
                     # Ending block math - ensure both flags are reset
@@ -158,53 +164,61 @@ class LaTeXBuffer:
                     self.in_inline_math = False  # Critical: reset inline math flag
                     result = self.buffer
                     self.buffer = ""
-                    if self.logger:
+                    if self.logger is not None:
                         self.logger.latex_completed(self.char_count, result)
                     if should_log:
-                        self.logger.log(
-                            f"  -> BLOCK MATH END: Returning '{result}' (len={len(result)}) - BOTH FLAGS RESET"
-                        )
+                        if self.logger is not None:
+                            self.logger.log(
+                                f"  -> BLOCK MATH END: Returning '{result}' (len={len(result)}) - BOTH FLAGS RESET"
+                            )
                     return result, True
             elif not self.in_block_math:
                 if not self.in_inline_math:
                     # Starting inline math
                     self.in_inline_math = True
                     if should_log:
-                        self.logger.log(
-                            f"  -> INLINE MATH START: Buffer now '{self.buffer}'"
-                        )
+                        if self.logger is not None:
+                            self.logger.log(
+                                f"  -> INLINE MATH START: Buffer now '{self.buffer}'"
+                            )
                     return "", False  # Don't display yet
                 else:
                     # Ending inline math
                     self.in_inline_math = False
                     result = self.buffer
                     self.buffer = ""
-                    if self.logger:
+                    if self.logger is not None:
                         self.logger.latex_completed(self.char_count, result)
                     if should_log:
-                        self.logger.log(
-                            f"  -> INLINE MATH END: Returning '{result}' (len={len(result)})"
-                        )
+                        if self.logger is not None:
+                            self.logger.log(
+                                f"  -> INLINE MATH END: Returning '{result}' (len={len(result)})"
+                            )
                     return result, True
 
         # If we're inside math, buffer everything
         if self.in_block_math or self.in_inline_math:
             if should_log:
-                self.logger.log(f"  -> BUFFERING (in math): '{char}' added to buffer")
+                if self.logger is not None:
+                    self.logger.log(
+                        f"  -> BUFFERING (in math): '{char}' added to buffer"
+                    )
             return "", False
 
         # Not in math, return the character immediately
         result = self.buffer
         self.buffer = ""
         if should_log:
-            self.logger.log(f"  -> IMMEDIATE DISPLAY: '{result}'")
+            if self.logger is not None:
+                self.logger.log(f"  -> IMMEDIATE DISPLAY: '{result}'")
             # Check if we should end context logging
-            if (
-                hasattr(self.logger, "latex_end_char")
-                and self.char_count
-                > self.logger.latex_end_char + self.logger.max_context
-            ):
-                self.logger.latex_context_end(self.char_count)
+            if self.logger is not None:
+                if (
+                    hasattr(self.logger, "latex_end_char")
+                    and self.char_count
+                    > self.logger.latex_end_char + self.logger.max_context
+                ):
+                    self.logger.latex_context_end(self.char_count)
         return result, True
 
     def add_text(self, text: str) -> str:
@@ -290,14 +304,14 @@ class StreamlitStreamingManager:
     This class provides a simpler approach that works better with Streamlit's execution model.
     """
 
-    def __init__(self):
-        self.config = None
+    def __init__(self) -> None:
+        self.config: Optional[StreamingConfig] = None
 
     def process_streamed_response(
         self,
         stream_source: Iterator[Dict[str, Any]],
-        message_placeholder,
-        quill_icon: str,
+        message_placeholder: DeltaGenerator,
+        quill_icon: str | None,
         streaming_mode: str,
         streaming_delay: float,
         debug: bool = True,
@@ -320,12 +334,14 @@ class StreamlitStreamingManager:
         self.config = StreamingConfig(mode=mode, delay=streaming_delay)
 
         # Use queue for shock absorber pattern
-        chunk_queue = queue.Queue(maxsize=10000)
+        chunk_queue: queue.Queue = queue.Queue(maxsize=10000)
         producer_finished = threading.Event()
-        producer_error = [None]  # Use list for mutable reference
-        completion_metadata = [None]
+        producer_error: list[Union[Optional[Exception], None]] = [
+            None
+        ]  # Use list for mutable reference
+        completion_metadata: list[Union[Dict[str, Any], None]] = [None]
 
-        def producer_worker():
+        def producer_worker() -> None:
             """Producer thread that feeds the queue"""
             try:
                 chunk_count = 0
@@ -343,9 +359,10 @@ class StreamlitStreamingManager:
 
                     if chunk_data.get("answer_chunk"):
                         try:
-                            chunk_queue.put(
-                                chunk_data, timeout=self.config.queue_timeout
-                            )
+                            if self.config is not None:
+                                chunk_queue.put(
+                                    chunk_data, timeout=self.config.queue_timeout
+                                )
                         except queue.Full:
                             print("Warning: Queue full, dropping chunk")
                             continue
@@ -532,8 +549,8 @@ def create_streaming_config(
 
 def handle_streamed_response(
     stream_source: Iterator[Dict[str, Any]],
-    message_placeholder,
-    quill_icon: str,
+    message_placeholder: DeltaGenerator,
+    quill_icon: str | None,
     streaming_mode: str,
     streaming_delay: float,
     debug: bool = False,

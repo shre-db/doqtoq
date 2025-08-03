@@ -1,7 +1,7 @@
 __module_name__ = "utils"
 
 
-def load_svg_icon(icon_path):
+def load_svg_icon(icon_path: str) -> str | None:
     """Load and return SVG icon as base64 encoded string"""
     try:
         with open(icon_path, "r") as f:
@@ -14,7 +14,7 @@ def load_svg_icon(icon_path):
         return None
 
 
-def load_png_icon(icon_path):
+def load_png_icon(icon_path: str) -> str | None:
     """Load and return PNG icon as base64 encoded string"""
     try:
         with open(icon_path, "rb") as f:

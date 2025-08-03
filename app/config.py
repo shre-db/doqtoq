@@ -3,7 +3,7 @@ __module_name__ = "config"
 import streamlit as st
 
 
-def init_session_state():
+def init_session_state() -> None:
     if "chat_history" not in st.session_state:
         st.session_state.chat_history = []
 

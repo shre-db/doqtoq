@@ -6,6 +6,7 @@ logger = logging.getLogger(__name__)
 
 import os
 import time
+from typing import Any, Dict
 
 import streamlit as st
 from streamlit_chat import message
@@ -14,7 +15,7 @@ from app.streaming_queue import handle_streamed_response
 from app.utils import load_png_icon, load_svg_icon
 
 
-def get_default_avatar():
+def get_default_avatar() -> tuple[str, str]:
     document_path = os.path.join(
         os.path.dirname(__file__), "..", "assets", "scroll-light.svg"
     )
@@ -24,13 +25,13 @@ def get_default_avatar():
     return document_path, user_path
 
 
-def get_quill():
+def get_quill() -> str | None:
     """Load and return the PNG Quill icon"""
     quill_path = os.path.join(os.path.dirname(__file__), "..", "assets", "quill.png")
     return load_png_icon(quill_path)
 
 
-def render_chat_interface():
+def render_chat_interface() -> None:
     # Display chat history first (before processing any new input)
     document_avatar, user_avatar = get_default_avatar()
     quill_icon = get_quill()
@@ -298,7 +299,9 @@ def render_chat_interface():
             st.rerun()
 
 
-def _show_response_context(response_metadata, source_docs):
+def _show_response_context(
+    response_metadata: Dict[str, Any], source_docs: list[Dict[str, Any]]
+) -> None:
     """Show contextual information about the response without rigid warnings."""
 
     # Show error information if there was an error
@@ -310,7 +313,6 @@ def _show_response_context(response_metadata, source_docs):
         # Show detailed error in an expander for debugging
         with st.expander("Error Details (for debugging)", expanded=False):
             st.code(str(response_metadata.get("error")))
-        return
 
     # Show source information if available
     if source_docs:

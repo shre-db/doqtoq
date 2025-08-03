@@ -3,7 +3,7 @@ __module_name__ = "styles"
 import streamlit as st
 
 
-def inject_custom_css():
+def inject_custom_css() -> None:
     st.markdown(
         """
         <style>

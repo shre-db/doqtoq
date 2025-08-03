@@ -8,7 +8,7 @@ from app.utils import load_svg_icon
 from backend.embedder import get_model_info, list_available_models
 
 
-def render_sidebar():
+def render_sidebar() -> None:
     # Get project root path
     project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
