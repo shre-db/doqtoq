@@ -110,6 +110,7 @@ celerybeat.pid
 .env.test.local
 .env.production.local
 .venv
+doqtoq-env/
 env/
 venv/
 ENV/
