@@ -5,10 +5,11 @@ langchain-google-genai
 langchain-huggingface
 langchain-mistralai
 langchain-ollama
-langchain-qdrant
+langchain-qdrant>=1.1.0,<2.0.0
 mistralai
 ollama
-protobuf==3.20.3
+qdrant-client>=1.15.1,<2.0.0
+protobuf>=5.29.0,<7.0.0
 pydantic
 PyPDF2
 python-dotenv

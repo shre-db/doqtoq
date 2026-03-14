@@ -4,7 +4,7 @@ channels:
   - conda-forge
 dependencies:
   - python=3.12
-  - protobuf=3.20.3
+  - protobuf>=5.29,<7
   - pip
   - pip:
       - streamlit
@@ -15,8 +15,10 @@ dependencies:
       - langchain-chroma
       - langchain-google-genai
       - langchain-mistralai
+      - langchain-qdrant>=1.1.0,<2.0.0
       - mistralai
       - chromadb
+      - qdrant-client>=1.15.1,<2.0.0
       - python-dotenv
       - PyPDF2
       - sentence-transformers

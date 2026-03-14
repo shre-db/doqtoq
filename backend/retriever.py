@@ -1,7 +1,11 @@
 __module_name__ = "retriever"
 
-from langchain.vectorstores.base import VectorStoreRetriever
 from langchain_chroma import Chroma
+
+try:
+    from langchain_core.vectorstores.base import VectorStoreRetriever
+except ImportError:  # Backward compatibility for older LangChain releases
+    from langchain.vectorstores.base import VectorStoreRetriever
 
 
 def get_basic_retriever(vectorstore: Chroma, k: int = 4) -> VectorStoreRetriever:

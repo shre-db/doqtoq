@@ -257,7 +257,7 @@ class DocumentRAG:
         self.chain = (
             {
                 "context": lambda x: format_docs(
-                    self.retriever.invoke(extract_question(x))
+                    self._retrieve_relevant_documents(extract_question(x))
                 ),
                 "question": extract_question,
                 "chat_history": safe_get_chat_history,
@@ -273,6 +273,21 @@ class DocumentRAG:
             | prompt_template
             | self.llm
             | StrOutputParser()
+        )
+
+    def _retrieve_relevant_documents(self, query: str):
+        """Retrieve docs across LangChain retriever API versions."""
+        if self.retriever is None:
+            return []
+
+        if hasattr(self.retriever, "invoke"):
+            return self.retriever.invoke(query)
+
+        if hasattr(self.retriever, "get_relevant_documents"):
+            return self.retriever.get_relevant_documents(query)
+
+        raise AttributeError(
+            "Retriever does not support 'invoke' or 'get_relevant_documents'."
         )
 
     def update_settings(
@@ -390,7 +405,7 @@ Please provide context for: {question}"""
         enhanced_query = self._enhance_query_with_context(question)
 
         # Retrieve relevant documents
-        retrieved_docs = self.retriever.get_relevant_documents(enhanced_query)
+        retrieved_docs = self._retrieve_relevant_documents(enhanced_query)
 
         # Calculate and store similarity metrics for UI display
         similarity_metrics = self._get_similarity_metrics(question)
@@ -444,7 +459,7 @@ Please provide context for: {question}"""
             Dict containing partial response chunks and metadata
         """
         # Retrieve relevant documents
-        retrieved_docs = self.retriever.get_relevant_documents(question)
+        retrieved_docs = self._retrieve_relevant_documents(question)
 
         # Calculate and store similarity metrics for UI display
         similarity_metrics = self._get_similarity_metrics(question)
